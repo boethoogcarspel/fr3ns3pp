@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+  <meta name="theme-color" content="#6c47ff"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Frans Oefenen"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>Frans Oefenen</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --brand:#6c47ff;--brand2:#9b72ff;--brand-l:#ede9fe;
+      --green:#16a34a;--green-p:#dcfce7;
+      --red:#dc2626;--red-p:#fee2e2;
+      --orange:#ea580c;--orange-p:#ffedd5;
+      --blue:#1d4ed8;--blue-p:#dbeafe;
+      --gray:#6b7280;--gray-l:#f3f4f6;--gray-b:#e5e7eb;
+      --text:#111827;--radius:16px;--card-shadow:0 2px 12px rgba(0,0,0,.08);
+    }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f3ff;color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:70px}
+
+    /* ── TOP NAV ── */
+    .nav{background:#fff;border-bottom:1px solid var(--gray-b);padding:12px 16px;position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:10px}
+    .nav-logo{font-size:22px;flex-shrink:0}
+    .nav-title{font-size:17px;font-weight:800;flex:1;color:var(--brand)}
+    .nav-back{background:var(--brand-l);border:none;color:var(--brand);width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0}
+    .nav-back.on{display:flex}
+    .nav-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(108,71,255,.3)}
+
+    /* ── BOTTOM TABS ── */
+    .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--gray-b);display:none;z-index:200}
+    .tabs.on{display:flex}
+    .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;cursor:pointer;border:none;background:none;font-family:inherit;gap:3px;transition:color .15s}
+    .tab .ti{font-size:20px}
+    .tab .tl{font-size:10px;font-weight:600;color:var(--gray)}
+    .tab.active .tl{color:var(--brand)}
+    .tab.active .ti{filter:none}
+
+    /* ── SCREENS ── */
+    .screen{display:none;padding:16px 16px 20px}
+    .screen.active{display:block}
+    .sec{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 8px}
+    .sec:first-child{margin-top:4px}
+
+    /* ── LOGIN ── */
+    .login-hero{text-align:center;padding:32px 0 24px}
+    .login-hero .logo{font-size:60px;margin-bottom:14px}
+    .login-hero h2{font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .login-hero p{color:var(--gray);margin-top:6px;font-size:14px}
+    .user-card{background:#fff;border-radius:var(--radius);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);border:2px solid transparent;transition:all .15s;margin-bottom:9px}
+    .user-card:active{border-color:var(--brand);transform:scale(.98)}
+    .user-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info h4{font-size:15px;font-weight:700}
+    .user-info p{font-size:11px;color:var(--gray);margin-top:2px}
+    .user-arr{margin-left:auto;color:var(--gray);font-size:18px}
+    .divider{display:flex;align-items:center;gap:10px;color:var(--gray);font-size:12px;margin:14px 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-b)}
+    .avatar-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .avatar-opt{width:42px;height:42px;border-radius:50%;background:var(--gray-l);border:3px solid transparent;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .avatar-opt.sel{border-color:var(--brand);background:var(--brand-l)}
+
+    /* ── FORMS ── */
+    .ig{margin-bottom:12px}
+    .ig label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:5px}
+    .ig input,.ig textarea{width:100%;padding:12px 14px;border:2px solid var(--gray-b);border-radius:12px;font-size:15px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .15s;resize:vertical}
+    .ig input:focus,.ig textarea:focus{border-color:var(--brand)}
+
+    /* ── BUTTONS ── */
+    .btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px;border:none;border-radius:13px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .12s,opacity .12s;margin-bottom:9px;font-family:inherit}
+    .btn:active{transform:scale(.97)}
+    .btn-brand{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 4px 14px rgba(108,71,255,.3)}
+    .btn-brand-o{background:var(--brand-l);color:var(--brand)}
+    .btn-green{background:var(--green);color:#fff}
+    .btn-green-o{background:var(--green-p);color:var(--green)}
+    .btn-gray{background:var(--gray-l);color:var(--text)}
+    .btn-red{background:var(--red);color:#fff}
+    .btn-orange{background:var(--orange);color:#fff}
+    .btn-row{display:flex;gap:9px;margin-bottom:9px}
+    .btn-row .btn{margin-bottom:0}
+    .btn-sm{font-size:12px;padding:9px 13px}
+    .btn-icon{width:36px;height:36px;border-radius:10px;padding:0;min-width:36px}
+
+    /* ── HOME DASHBOARD ── */
+    .dash-greet{padding:18px 0 6px}
+    .dash-greet h2{font-size:22px;font-weight:800}
+    .dash-greet p{font-size:13px;color:var(--gray);margin-top:3px}
+    .streak-card{background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:var(--radius);padding:16px;color:#fff;display:flex;align-items:center;gap:14px;margin-bottom:14px;box-shadow:0 4px 16px rgba(108,71,255,.3)}
+    .streak-icon{font-size:38px}
+    .streak-info h3{font-size:18px;font-weight:800}
+    .streak-info p{font-size:12px;opacity:.85;margin-top:2px}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .stat-card{background:#fff;border-radius:var(--radius);padding:14px;box-shadow:var(--card-shadow)}
+    .stat-card .sv{font-size:24px;font-weight:900;color:var(--brand)}
+    .stat-card .sl{font-size:11px;color:var(--gray);margin-top:2px}
+    .stat-card .si{font-size:20px;margin-bottom:4px}
+
+    /* ── CATEGORY GRID ── */
+    .cat-grid{display:flex;flex-direction:column;gap:9px}
+    .cat-card{background:#fff;border-radius:var(--radius);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);transition:transform .12s;border:2px solid transparent}
+    .cat-card:active{transform:scale(.98);border-color:var(--brand-l)}
+    .cat-card.dashed{border:2px dashed var(--gray-b);background:transparent;box-shadow:none}
+    .cat-icon{font-size:26px;flex-shrink:0}
+    .cat-info{flex:1;min-width:0}
+    .cat-info h4{font-size:14px;font-weight:700}
+    .cat-info p{font-size:11px;color:var(--gray);margin-top:2px}
+    .cat-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .cat-badge{background:var(--brand-l);color:var(--brand);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+    .quiz-btn{background:var(--orange-p);color:var(--orange);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;cursor:pointer;border:none;font-family:inherit}
+    .del-btn{background:none;border:none;color:var(--red);font-size:17px;cursor:pointer;padding:3px 5px;border-radius:7px}
+    .del-btn:active{background:var(--red-p)}
+
+    /* ── PROGRESS ── */
+    .prog-bar{background:var(--gray-l);border-radius:999px;height:5px;margin-bottom:16px;overflow:hidden}
+    .prog-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:999px;transition:width .3s}
+    .counter{font-size:12px;color:var(--gray);text-align:center;margin-bottom:9px}
+
+    /* ── PHRASE / TRANS CARDS ── */
+    .pcard{background:#fff;border-radius:var(--radius);padding:22px 18px;box-shadow:var(--card-shadow);margin-bottom:13px;text-align:center}
+    .pcard-fr{font-size:21px;font-weight:700;color:var(--brand);line-height:1.4;margin-bottom:5px}
+    .pcard-ctx{font-size:12px;color:var(--gray);font-style:italic;margin-bottom:16px}
+    .transl-box{background:var(--brand-l);border-radius:11px;padding:11px 15px;font-size:14px;color:var(--brand);font-weight:500;display:none}
+    .transl-box.on{display:block}
+    .tcard{background:#fff;border-radius:var(--radius);padding:22px 18px;box-shadow:var(--card-shadow);margin-bottom:13px}
+    .tcard-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);text-align:center;margin-bottom:8px}
+    .tcard-nl{font-size:21px;font-weight:700;color:var(--text);text-align:center;line-height:1.4;margin-bottom:16px}
+    .tcard-reveal{background:var(--green-p);border-radius:11px;padding:12px 15px;text-align:center;display:none;margin-top:12px}
+    .tcard-reveal.on{display:block}
+    .tcard-reveal .rl{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+    .tcard-reveal .rt{font-size:17px;font-weight:700;color:var(--green)}
+
+    /* ── VOCAB CARD ── */
+    .vcard{background:#fff;border-radius:var(--radius);padding:22px 18px;box-shadow:var(--card-shadow);margin-bottom:13px}
+    .vcard-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--orange);text-align:center;margin-bottom:8px}
+    .vcard-nl{font-size:28px;font-weight:800;color:var(--text);text-align:center;margin-bottom:18px}
+    .vcard-answer{background:var(--green-p);border-radius:11px;padding:12px 15px;text-align:center;display:none;margin-bottom:12px}
+    .vcard-answer.on{display:block}
+    .vcard-answer .al{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+    .vcard-answer .at{font-size:18px;font-weight:700;color:var(--green)}
+    .vcard-wrong{background:var(--red-p);border-radius:11px;padding:12px 15px;text-align:center;display:none;margin-bottom:12px}
+    .vcard-wrong.on{display:block}
+    .vcard-wrong .wl{font-size:12px;color:var(--red);font-weight:600}
+
+    /* ── MIC ── */
+    .mic-wrap{text-align:center;margin:4px 0 13px}
+    .mic-btn{width:72px;height:72px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:30px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(108,71,255,.4);transition:all .15s}
+    .mic-btn.rec{background:var(--red);box-shadow:0 4px 20px rgba(220,38,38,.5);animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(220,38,38,.5)}50%{box-shadow:0 4px 32px rgba(220,38,38,.8),0 0 0 12px rgba(220,38,38,.15)}}
+    .mic-lbl{font-size:12px;color:var(--gray);margin-top:8px;min-height:18px}
+    .pron-pass-banner{background:var(--green-p);border:1px solid #86efac;border-radius:11px;padding:11px 14px;text-align:center;font-size:14px;font-weight:700;color:var(--green);margin-bottom:11px;display:none}
+    .pron-pass-banner.on{display:block}
+    .attempts-note{text-align:center;font-size:12px;color:var(--gray);margin-bottom:8px;display:none}
+    .attempts-note.on{display:block}
+    .pron-step-banner{background:var(--brand-l);border-radius:11px;padding:10px 14px;text-align:center;font-size:13px;color:var(--brand);font-weight:600;margin-bottom:13px}
+
+    /* ── FEEDBACK ── */
+    .fb{border-radius:13px;padding:15px;margin-bottom:11px;display:none}
+    .fb.on{display:block}
+    .fb.good{background:var(--green-p);border:1px solid #bbf7d0}
+    .fb.ok{background:var(--orange-p);border:1px solid #fed7aa}
+    .fb.bad{background:var(--red-p);border:1px solid #fecaca}
+    .fb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .fb-verdict{font-size:14px;font-weight:700}
+    .fb.good .fb-verdict{color:var(--green)}.fb.ok .fb-verdict{color:var(--orange)}.fb.bad .fb-verdict{color:var(--red)}
+    .fb-score{font-size:17px;font-weight:900;padding:3px 11px;border-radius:20px}
+    .fb.good .fb-score{background:#bbf7d0;color:var(--green)}.fb.ok .fb-score{background:#fed7aa;color:var(--orange)}.fb.bad .fb-score{background:#fecaca;color:var(--red)}
+    .fb-bar{height:7px;background:rgba(0,0,0,.1);border-radius:999px;overflow:hidden;margin-bottom:9px}
+    .fb-bar-fill{height:100%;border-radius:999px;transition:width .5s}
+    .fb.good .fb-bar-fill{background:var(--green)}.fb.ok .fb-bar-fill{background:var(--orange)}.fb.bad .fb-bar-fill{background:var(--red)}
+    .fb-heard{font-size:12px;color:#374151;margin-bottom:7px}
+    .fb-heard em{font-style:italic;font-weight:600}
+    .chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
+    .chip{padding:3px 8px;border-radius:7px;font-size:12px;font-weight:600}
+    .chip.c{background:#bbf7d0;color:var(--green)}.chip.m{background:#fecaca;color:var(--red)}
+    .fb-missed{font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px}
+    .fb-tip{font-size:12px;color:#374151;background:rgba(255,255,255,.6);border-radius:8px;padding:8px 10px;margin-top:8px;display:none}
+    .fb-tip strong{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;opacity:.7}
+
+    /* ── QUIZ ── */
+    .quiz-q-card{background:#fff;border-radius:var(--radius);padding:22px 18px;box-shadow:var(--card-shadow);margin-bottom:14px;text-align:center}
+    .quiz-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--brand);margin-bottom:8px}
+    .quiz-question{font-size:19px;font-weight:700;color:var(--text);line-height:1.4}
+    .quiz-options{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
+    .quiz-opt{background:#fff;border:2px solid var(--gray-b);border-radius:13px;padding:14px 16px;font-size:14px;font-weight:500;cursor:pointer;text-align:left;font-family:inherit;color:var(--text);transition:all .15s}
+    .quiz-opt:active{transform:scale(.98)}
+    .quiz-opt.correct{background:var(--green-p);border-color:#86efac;color:var(--green);font-weight:700}
+    .quiz-opt.wrong{background:var(--red-p);border-color:#fca5a5;color:var(--red);font-weight:700}
+    .quiz-opt.disabled{cursor:default;pointer-events:none}
+    .quiz-ctr{font-size:12px;color:var(--gray);text-align:center;margin-bottom:6px}
+
+    /* ── SENTENCE MANAGER ── */
+    .item-row{background:#fff;border-radius:11px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .item-row-text{flex:1;min-width:0}
+    .item-row-fr{font-size:14px;font-weight:600;color:var(--brand)}
+    .item-row-nl{font-size:12px;color:var(--gray);margin-top:2px}
+    .item-row-badge{font-size:10px;padding:2px 7px;border-radius:10px;margin-top:4px;display:inline-block}
+    .badge-pub{background:#dcfce7;color:var(--green)}
+    .badge-priv{background:var(--gray-l);color:var(--gray)}
+    .item-actions{display:flex;gap:4px;flex-shrink:0;align-items:center}
+    .share-btn{background:none;border:1px solid var(--green);color:var(--green);font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;cursor:pointer;font-family:inherit}
+    .share-btn.pub{background:var(--green-p);border-color:var(--green)}
+    .item-row.hidden-item{opacity:.38;background:var(--gray-l)}
+    .item-row.hidden-item .item-row-fr{text-decoration:line-through}
+    .restore-btn{background:none;border:1px solid var(--brand);color:var(--brand);font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px;cursor:pointer;font-family:inherit}
+    .owner-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;display:inline-block;margin-top:4px}
+    .owner-badge.mine{background:var(--brand-l);color:var(--brand)}
+    .owner-badge.other{background:var(--gray-l);color:var(--gray)}
+    .manage-btn{background:var(--brand-l);border:none;color:var(--brand);font-size:12px;font-weight:600;padding:5px 10px;border-radius:9px;cursor:pointer;font-family:inherit;flex-shrink:0}
+    .hidden-count{font-size:11px;color:var(--gray);margin-bottom:8px;display:none}
+    .hidden-count.on{display:block}
+
+    /* ── SCORE ── */
+    .score-wrap{text-align:center;padding:34px 0 20px}
+    .score-emoji{font-size:58px;margin-bottom:13px}
+    .score-title{font-size:23px;font-weight:800;color:var(--brand);margin-bottom:6px}
+    .score-sub{font-size:14px;color:var(--gray);margin-bottom:22px}
+    .score-circle{width:115px;height:115px;border-radius:50%;background:var(--brand-l);border:6px solid var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 22px}
+    .score-num{font-size:32px;font-weight:900;color:var(--brand)}
+
+    /* ── PROFILE ── */
+    .profile-header{text-align:center;padding:24px 0 18px}
+    .profile-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:42px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 16px rgba(108,71,255,.3)}
+    .profile-name{font-size:20px;font-weight:800}
+    .profile-sub{font-size:13px;color:var(--gray);margin-top:3px}
+    .profile-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+    .ps-card{background:#fff;border-radius:12px;padding:12px 8px;text-align:center;box-shadow:var(--card-shadow)}
+    .ps-card .pv{font-size:20px;font-weight:800;color:var(--brand)}
+    .ps-card .pl{font-size:10px;color:var(--gray);margin-top:2px}
+
+    /* ── HOME PROFILE BANNER ── */
+    .home-profile{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .home-profile-photo{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+    .home-profile-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .home-profile-info{flex:1;min-width:0}
+    .home-profile-name{font-size:17px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .home-profile-streak{font-size:13px;color:var(--gray);margin-top:2px}
+    .home-profile-right{text-align:right;flex-shrink:0}
+    .home-total-num{font-size:22px;font-weight:900;color:var(--brand);line-height:1}
+    .home-total-lbl{font-size:10px;color:var(--gray);margin-top:2px}
+
+    /* ── SECTION HEADER WITH ACTION ── */
+    .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px}
+    .sec-hdr .sec{margin:0}
+    .sec-hdr-btns{display:flex;gap:6px}
+    .chip-btn{padding:6px 12px;border-radius:20px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .12s}
+    .chip-btn:active{transform:scale(.95)}
+    .chip-btn-gray{background:var(--gray-l);color:var(--text)}
+    .chip-btn-brand{background:var(--brand);color:#fff}
+
+    /* ── GROUP CARDS ── */
+    .group-card{background:#fff;border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);margin-bottom:9px;cursor:pointer;transition:transform .12s;border:2px solid transparent}
+    .group-card:active{transform:scale(.98);border-color:var(--brand-l)}
+    .group-icon{width:44px;height:44px;border-radius:12px;background:var(--brand-l);font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .group-info{flex:1;min-width:0}
+    .group-name{font-size:14px;font-weight:700;color:var(--text)}
+    .group-meta{font-size:11px;color:var(--gray);margin-top:2px}
+    .group-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+    .group-badge-pub{background:var(--green-p);color:var(--green);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+    .group-badge-priv{background:var(--gray-l);color:var(--gray);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+    .group-arr{color:var(--gray);font-size:18px}
+
+    /* ── PRACTICE SECTION ── */
+    .practice-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+    .practice-card{background:#fff;border-radius:var(--radius);padding:16px 12px;box-shadow:var(--card-shadow);cursor:pointer;text-align:center;border:2px solid transparent;transition:all .12s}
+    .practice-card:active{transform:scale(.97);border-color:var(--brand-l)}
+    .practice-icon{font-size:26px;margin-bottom:6px}
+    .practice-label{font-size:13px;font-weight:700;color:var(--text)}
+    .practice-count{font-size:11px;color:var(--gray);margin-top:2px}
+
+    /* ── MISC ── */
+    .warn-box{background:var(--orange-p);border-radius:11px;padding:11px 13px;font-size:13px;color:var(--orange);margin-bottom:12px}
+    .info-card{background:#fff;border-radius:var(--radius);padding:13px 15px;margin-bottom:11px;font-size:13px;color:var(--gray);box-shadow:var(--card-shadow)}
+    .info-card strong{color:var(--text)}
+    .empty{text-align:center;padding:20px 16px;color:var(--gray);font-size:13px}
+    .empty .ei{font-size:36px;margin-bottom:9px}
+    .community-badge{background:#fef9c3;color:#92400e;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px}
+
+    /* ── GROEPEN ── */
+    .group-detail-header{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--card-shadow);margin-bottom:14px;display:flex;align-items:center;gap:14px}
+    .group-detail-icon{width:52px;height:52px;border-radius:14px;background:var(--brand-l);font-size:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .group-detail-info{flex:1;min-width:0}
+    .group-detail-name{font-size:17px;font-weight:800}
+    .group-detail-meta{font-size:12px;color:var(--gray);margin-top:3px}
+    .toggle-row{background:#fff;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--card-shadow);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+    .toggle-row-info h4{font-size:14px;font-weight:700}
+    .toggle-row-info p{font-size:11px;color:var(--gray);margin-top:2px}
+    .toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-slider{position:absolute;inset:0;background:var(--gray-b);border-radius:999px;cursor:pointer;transition:background .2s}
+    .toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+    .toggle input:checked+.toggle-slider{background:var(--brand)}
+    .toggle input:checked+.toggle-slider:before{transform:translateX(18px)}
+    .code-box{background:var(--brand-l);border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+    .code-box-val{font-size:22px;font-weight:900;letter-spacing:.15em;color:var(--brand);font-family:monospace}
+    .code-copy-btn{background:var(--brand);color:#fff;border:none;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .members-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+    .member-chip{display:flex;align-items:center;gap:6px;background:var(--gray-l);border-radius:20px;padding:5px 11px 5px 5px;font-size:12px;font-weight:600}
+    .member-chip-av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+    .member-chip-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .member-chip.owner{background:var(--brand-l)}
+    .group-phrase-row{background:#fff;border-radius:11px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .group-phrase-text{flex:1;min-width:0}
+    .group-phrase-fr{font-size:14px;font-weight:600;color:var(--brand)}
+    .group-phrase-nl{font-size:12px;color:var(--gray);margin-top:2px}
+    .group-phrase-by{font-size:10px;color:var(--gray);margin-top:3px}
+    .search-result-card{background:#fff;border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);margin-bottom:9px}
+    .search-result-info{flex:1}
+    .search-result-name{font-size:14px;font-weight:700}
+    .search-result-meta{font-size:11px;color:var(--gray);margin-top:2px}
+
+    /* ── PHOTO UPLOAD ── */
+    /* ── QR MODAL ── */
+    .qr-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:none;align-items:flex-end;justify-content:center}
+    .qr-modal.open{display:flex}
+    .qr-sheet{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;animation:slideUp .25s ease}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .qr-sheet-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:4px}
+    .qr-sheet-sub{font-size:12px;color:var(--gray);text-align:center;margin-bottom:20px}
+    .qr-wrap{display:flex;justify-content:center;margin-bottom:16px}
+    .qr-wrap canvas,.qr-wrap img{border-radius:12px;border:4px solid var(--brand-l)}
+    .sync-text-row{display:flex;align-items:center;gap:8px;background:var(--gray-l);border-radius:12px;padding:11px 13px;margin-bottom:14px}
+    .sync-text-val{flex:1;font-size:11px;font-family:monospace;word-break:break-all;color:var(--text);line-height:1.4}
+    .sync-copy-btn{background:var(--brand);color:#fff;border:none;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+
+    /* ── WACHTWOORD EISEN ── */
+    .pw-reqs{margin:-4px 0 12px;padding:10px 12px;background:var(--gray-l);border-radius:10px;display:none}
+    .pw-reqs.show{display:block}
+    .pw-req{display:flex;align-items:center;gap:7px;font-size:12px;padding:2px 0;color:var(--gray);transition:color .2s}
+    .pw-req.ok{color:var(--green)}
+    .pw-req::before{content:'✗';font-size:12px;font-weight:700;color:var(--red);flex-shrink:0;width:14px}
+    .pw-req.ok::before{content:'✓';color:var(--green)}
+    .sync-code-pill{display:inline-flex;align-items:center;gap:8px;background:var(--brand-l);border-radius:20px;padding:7px 14px;font-size:14px;font-weight:700;color:var(--brand);letter-spacing:.04em;margin-bottom:4px}
+    .fb-setup-banner{background:var(--orange-p);border:1px solid #fed7aa;border-radius:12px;padding:12px 14px;font-size:12px;color:var(--orange);margin-bottom:12px;line-height:1.5}
+    .fb-setup-banner strong{display:block;margin-bottom:4px;font-size:13px}
+
+    /* ── PHOTO UPLOAD ── */
+    .photo-upload{width:80px;height:80px;border-radius:50%;background:var(--gray-l);border:3px dashed var(--gray-b);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;margin:0 auto 10px;transition:border-color .15s}
+    .photo-upload:hover{border-color:var(--brand)}
+    .photo-upload img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .photo-upload .ph-placeholder{font-size:28px;line-height:1;pointer-events:none}
+    .photo-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .photo-hint{text-align:center;font-size:11px;color:var(--gray);margin-bottom:14px}
+    .nav-avatar-img{width:36px;height:36px;border-radius:50%;object-fit:cover;display:block}
+
+    /* ── AUTH CARDS ── */
+    .auth-card{background:#fff;border-radius:var(--radius);padding:14px;box-shadow:var(--card-shadow);margin-bottom:9px}
+    .auth-card .user-card{padding:0;box-shadow:none;margin:0;border:none;background:transparent}
+    .pw-row{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .pw-row input{flex:1;padding:10px 13px;border:2px solid var(--gray-b);border-radius:11px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;color:var(--text)}
+    .pw-row input:focus{border-color:var(--brand)}
+    .pw-row .pw-btn{padding:10px 16px;border:none;border-radius:11px;background:var(--brand);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+    .pw-err{color:var(--red);font-size:12px;margin-top:6px;display:none}
+    .user-av-img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0}
+
+    /* ── SYNC ── */
+    .sync-box{background:var(--gray-l);border-radius:10px;padding:11px 13px;font-size:11px;font-family:monospace;word-break:break-all;color:var(--text);margin-bottom:9px;max-height:70px;overflow-y:auto;user-select:all;cursor:text}
+    .profile-photo-wrap{position:relative;width:80px;height:80px;margin:0 auto 12px;cursor:pointer}
+    .profile-photo-wrap img,.profile-av-large{width:80px;height:80px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(108,71,255,.3)}
+    .profile-av-large{background:linear-gradient(135deg,var(--brand),var(--brand2));font-size:42px;display:flex;align-items:center;justify-content:center}
+    .profile-photo-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+    .profile-photo-edit input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border-radius:50%}
+  </style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<div class="nav" id="nav">
+  <button class="nav-back" id="navBack" onclick="goBack()">←</button>
+  <span class="nav-logo">🇫🇷</span>
+  <span class="nav-title" id="navTitle">Frans Oefenen</span>
+  <button class="nav-avatar" id="navAvatar" onclick="showTab('profile')" style="display:none"><span id="navAvatarInner">👤</span></button>
+</div>
+
+<!-- ── BOTTOM TABS ── -->
+<div class="tabs" id="tabBar">
+  <button class="tab" id="tab-home" onclick="showTab('home')"><span class="ti">🏠</span><span class="tl">Home</span></button>
+  <button class="tab" id="tab-conv" onclick="showTab('conv-cats')"><span class="ti">💬</span><span class="tl">Gesprek</span></button>
+  <button class="tab" id="tab-pron" onclick="showTab('pron-cats')"><span class="ti">🎤</span><span class="tl">Uitspraak</span></button>
+  <button class="tab" id="tab-trans" onclick="showTab('trans-cats')"><span class="ti">🔄</span><span class="tl">Vertalen</span></button>
+  <button class="tab" id="tab-vocab" onclick="showTab('vocab-cats')"><span class="ti">📝</span><span class="tl">Woorden</span></button>
+</div>
+
+<!-- ══════════ SCREENS ══════════ -->
+
+<!-- LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="login-hero"><div class="logo">🇫🇷</div><h2>Frans Oefenen</h2><p>Log in of maak een nieuw account aan</p></div>
+  <div class="sec">Bestaande accounts</div>
+  <div id="userList"></div>
+  <div class="divider">nieuw account</div>
+  <div class="auth-card">
+    <div class="photo-upload" id="newPhotoWrap">
+      <span class="ph-placeholder" id="newPhotoPlaceholder">📷</span>
+      <img id="newPhotoPreview" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%">
+      <input type="file" accept="image/*" onchange="handlePhotoSelect(this)">
+    </div>
+    <div class="photo-hint">Tik om profielfoto te kiezen (optioneel)</div>
+    <div class="ig"><label>Jouw naam</label><input id="newName" type="text" placeholder="Bijv. Emma" maxlength="30"/></div>
+    <div class="ig">
+      <label>Persoonlijke code <span style="font-weight:400;color:var(--gray)">(bijv. tennis123)</span></label>
+      <input id="newSyncCode" type="text" placeholder="tennis123" maxlength="20" autocapitalize="none" autocorrect="off" style="font-family:monospace;font-weight:700;letter-spacing:.04em"/>
+      <div style="font-size:11px;color:var(--gray);margin-top:4px">Alleen letters en cijfers · gebruik dit op een ander apparaat om in te loggen</div>
+    </div>
+    <div class="ig">
+      <label>Wachtwoord</label>
+      <input id="newPw" type="password" placeholder="Minimaal 8 tekens" oninput="renderPwReqs(this.value)"/>
+      <div class="pw-reqs" id="pwReqs">
+        <div class="pw-req" id="req-len">Minimaal 8 tekens</div>
+        <div class="pw-req" id="req-upper">Minimaal 1 hoofdletter</div>
+        <div class="pw-req" id="req-special">Minimaal 1 speciaal teken (!@#$%^&amp;* enz.)</div>
+      </div>
+    </div>
+    <div class="ig"><label>Avatar (als je geen foto hebt)</label><div class="avatar-picker" id="avatarPicker"></div></div>
+    <div id="createError" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none"></div>
+    <button class="btn btn-brand" onclick="createUser()" style="margin-bottom:0">✨ Account aanmaken</button>
+  </div>
+  <div class="divider">of importeer van ander apparaat</div>
+  <div class="auth-card">
+    <p style="font-size:12px;color:var(--gray);margin-bottom:10px">Plak hier de code die je op je andere apparaat hebt gekopieerd (of gescand).</p>
+    <div class="ig"><label>Sync code</label><textarea id="importCodeField" rows="2" placeholder="Plak hier je sync code…" style="font-size:11px;font-family:monospace;resize:none"></textarea></div>
+    <div class="ig"><label>Wachtwoord</label><input id="importPwField" type="password" placeholder="Jouw wachtwoord" onkeydown="if(event.key==='Enter')importAccount()"/></div>
+    <div id="importError" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none"></div>
+    <button class="btn btn-brand-o" onclick="importAccount()" style="margin-bottom:0">📲 Account importeren</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="screen-home">
+  <!-- Profiel banner -->
+  <div class="home-profile" style="margin-top:4px">
+    <div class="home-profile-photo" id="homeProfilePhoto">👤</div>
+    <div class="home-profile-info">
+      <div class="home-profile-name" id="homeProfileName">—</div>
+      <div class="home-profile-streak">🔥 <span id="dashStreak">0</span> dagen reeks</div>
+    </div>
+    <div class="home-profile-right">
+      <div class="home-total-num" id="homeTotal">0</div>
+      <div class="home-total-lbl">oefeningen</div>
+    </div>
+  </div>
+
+  <!-- Groepen -->
+  <div class="sec-hdr">
+    <span class="sec">Mijn groepen</span>
+    <div class="sec-hdr-btns">
+      <button class="chip-btn chip-btn-gray" onclick="showScreen('screen-group-search','🔍 Groep zoeken')">🔍 Zoeken</button>
+      <button class="chip-btn chip-btn-brand" onclick="showScreen('screen-group-create','Nieuwe groep')">+ Nieuw</button>
+    </div>
+  </div>
+  <div id="homeGroupList"></div>
+
+  <!-- Oefenen -->
+  <div class="sec">Oefenen</div>
+  <div class="practice-grid">
+    <div class="practice-card" onclick="showTab('conv-cats')">
+      <div class="practice-icon">💬</div>
+      <div class="practice-label">Gesprek</div>
+      <div class="practice-count" id="sCards">0 kaarten</div>
+    </div>
+    <div class="practice-card" onclick="showTab('pron-cats')">
+      <div class="practice-icon">🎤</div>
+      <div class="practice-label">Uitspraak</div>
+      <div class="practice-count" id="sPron">0 oefeningen</div>
+    </div>
+    <div class="practice-card" onclick="showTab('trans-cats')">
+      <div class="practice-icon">🔄</div>
+      <div class="practice-label">Vertalen</div>
+      <div class="practice-count" id="sTrans">0 vertalingen</div>
+    </div>
+    <div class="practice-card" onclick="showTab('vocab-cats')">
+      <div class="practice-icon">📝</div>
+      <div class="practice-label">Woorden</div>
+      <div class="practice-count" id="sVocab">0 woorden</div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP SEARCH (placeholder voor stap 3) -->
+<!-- GROUP SEARCH / JOIN -->
+<div class="screen" id="screen-group-search">
+  <div class="auth-card" style="margin-bottom:14px">
+    <div class="ig" style="margin-bottom:8px"><label>🔑 Deelcode invoeren</label><input id="groupJoinCode" type="text" placeholder="Bijv. ABC123" maxlength="6" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700"/></div>
+    <button class="btn btn-brand" onclick="joinByCode()" style="margin-bottom:0">Groep joinen via code</button>
+  </div>
+  <div class="sec">Openbare groepen</div>
+  <div class="ig"><input id="groupSearchQ" type="text" placeholder="Zoek op naam…" oninput="renderGroupSearch()"/></div>
+  <div id="groupSearchResults"></div>
+</div>
+
+<!-- GROUP CREATE -->
+<div class="screen" id="screen-group-create">
+  <div class="auth-card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="font-size:42px;line-height:1" id="gcIconPreview">📚</div>
+      <div class="ig" style="flex:1;margin-bottom:0"><label>Emoji icoon</label><input id="gcIcon" placeholder="📚" maxlength="3" oninput="document.getElementById('gcIconPreview').textContent=this.value||'📚'" style="width:80px"/></div>
+    </div>
+    <div class="ig"><label>Naam van de groep *</label><input id="gcName" placeholder="Bijv. Klas 3B Frans" maxlength="40"/></div>
+    <button class="btn btn-brand" onclick="createGroup()" style="margin-bottom:0">👥 Groep aanmaken</button>
+  </div>
+</div>
+
+<!-- GROUP DETAIL -->
+<div class="screen" id="screen-group-detail">
+  <div class="group-detail-header">
+    <div class="group-detail-icon" id="gdIcon">📚</div>
+    <div class="group-detail-info">
+      <div class="group-detail-name" id="gdName">—</div>
+      <div class="group-detail-meta" id="gdMeta">—</div>
+    </div>
+  </div>
+
+  <!-- Openbaar toggle (alleen eigenaar) -->
+  <div class="toggle-row" id="gdToggleRow">
+    <div class="toggle-row-info"><h4>Openbaar</h4><p>Iedereen kan de groep vinden en joinen</p></div>
+    <label class="toggle"><input type="checkbox" id="gdPublicToggle" onchange="toggleGroupPublic()"><span class="toggle-slider"></span></label>
+  </div>
+
+  <!-- Deelcode -->
+  <div class="sec">Deelcode</div>
+  <div class="code-box"><span class="code-box-val" id="gdCode">——</span><button class="code-copy-btn" onclick="copyGroupCode()">Kopiëren</button></div>
+  <p style="font-size:11px;color:var(--gray);margin-bottom:14px">Deel deze code zodat anderen kunnen joinen via 'Groep zoeken'.</p>
+
+  <!-- Leden -->
+  <div class="sec">Leden</div>
+  <div class="members-row" id="gdMembers"></div>
+  <button class="btn btn-gray btn-sm" id="gdLeaveBtn" onclick="leaveGroup()" style="margin-top:10px;margin-bottom:14px">🚪 Groep verlaten</button>
+
+  <!-- Zinnen -->
+  <div class="sec-hdr"><span class="sec">Zinnen</span><span id="gdPhraseCount" style="font-size:11px;color:var(--gray)"></span></div>
+  <div id="gdPhrases"></div>
+
+  <!-- Zin toevoegen -->
+  <div class="auth-card" style="margin-top:6px">
+    <div class="sec" style="margin-top:0">Zin toevoegen</div>
+    <div class="ig"><label>🇫🇷 Frans *</label><input id="gdFr" placeholder="Bijv. Je voudrais…" autocorrect="off" autocomplete="off"/></div>
+    <div class="ig" style="margin-bottom:8px"><label>🇳🇱 Nederlands</label><input id="gdNl" placeholder="Bijv. Ik wil graag…"/></div>
+    <button class="btn btn-brand" onclick="addGroupPhrase()" style="margin-bottom:0">➕ Toevoegen</button>
+  </div>
+</div>
+
+<!-- CONV CATS -->
+<div class="screen" id="screen-conv-cats">
+  <div class="sec">Kies een onderwerp</div>
+  <div class="cat-grid" id="convCatGrid"></div>
+</div>
+
+<!-- CONV PRACTICE -->
+<div class="screen" id="screen-conv">
+  <div class="counter" id="convCtr">Kaart 1 / 10</div>
+  <div class="prog-bar"><div class="prog-fill" id="convProg" style="width:0%"></div></div>
+  <div class="pcard">
+    <div class="pcard-fr" id="convFr"></div>
+    <div class="pcard-ctx" id="convCtx"></div>
+    <div class="transl-box" id="convTr"></div>
+  </div>
+  <button class="btn btn-brand-o" id="convShowTr" onclick="toggleTr()">👁 Toon vertaling</button>
+  <button class="btn btn-gray" onclick="speakConv()">🔊 Hoor uitspraak</button>
+  <div class="btn-row">
+    <button class="btn btn-gray" onclick="convPrev()">← Vorige</button>
+    <button class="btn btn-green" onclick="convNext()">Volgende →</button>
+  </div>
+</div>
+
+<!-- PRON CATS -->
+<div class="screen" id="screen-pron-cats">
+  <div class="sec">Kies een onderwerp</div>
+  <div class="cat-grid" id="pronCatGrid"></div>
+</div>
+
+<!-- PRON PRACTICE -->
+<div class="screen" id="screen-pron">
+  <div class="counter" id="pronCtr">Oefening 1 / 10</div>
+  <div class="prog-bar"><div class="prog-fill" id="pronProg" style="width:0%"></div></div>
+  <div class="pcard">
+    <div class="pcard-fr" id="pronFr"></div>
+    <div style="color:var(--gray);font-size:13px;text-align:center;margin-bottom:14px" id="pronNl"></div>
+    <button class="btn btn-brand-o" onclick="speakPron()">🔊 Luister naar uitspraak</button>
+    <div class="warn-box" id="pronWarn" style="display:none">⚠️ Spraakherkenning niet beschikbaar. Gebruik Chrome of Safari.</div>
+    <div id="pronMicWrap">
+      <div class="mic-wrap"><button class="mic-btn" id="pronMic" onclick="togglePronRec()">🎤</button><div class="mic-lbl" id="pronLbl">Tik op de microfoon en spreek</div></div>
+    </div>
+    <div class="pron-pass-banner" id="pronPassBanner">✅ Parfait! Correct uitgesproken!</div>
+    <div class="attempts-note" id="pronAttNote"></div>
+    <div class="fb" id="pronFb">
+      <div class="fb-head"><div class="fb-verdict" id="pronVerdict"></div><div class="fb-score" id="pronScore"></div></div>
+      <div class="fb-bar"><div class="fb-bar-fill" id="pronBar" style="width:0%"></div></div>
+      <div class="fb-heard" id="pronHeard"></div>
+      <div class="chips" id="pronChips"></div>
+      <div class="fb-missed" id="pronMissed"></div>
+      <div class="fb-tip" id="pronTip"><strong>💡 Uitspraaktop</strong><span id="pronTipText"></span></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gray" onclick="pronPrev()">← Vorige</button>
+    <button class="btn btn-green" id="pronNextBtn" onclick="pronNext()" style="display:none">Volgende →</button>
+  </div>
+  <button class="btn btn-gray btn-sm" id="pronSkipBtn" onclick="pronSkip()" style="display:none">Toch verder → (na 3 pogingen)</button>
+</div>
+
+<!-- TRANS CATS -->
+<div class="screen" id="screen-trans-cats">
+  <div class="sec">Kies een onderwerp</div>
+  <div class="cat-grid" id="transCatGrid"></div>
+</div>
+
+<!-- TRANS PRACTICE -->
+<div class="screen" id="screen-trans">
+  <div class="counter" id="transCtr">Oefening 1 / 10</div>
+  <div class="prog-bar"><div class="prog-fill" id="transProg" style="width:0%"></div></div>
+  <div class="tcard">
+    <div class="tcard-label">🇳🇱 Zeg dit in het Frans:</div>
+    <div class="tcard-nl" id="transNl"></div>
+    <button class="btn btn-gray" id="transRevBtn" onclick="toggleTransRev()" style="margin-top:4px">💡 Toon Frans antwoord</button>
+    <button class="btn btn-gray" onclick="speakTrans()">🔊 Hoor correcte uitspraak</button>
+    <div class="tcard-reveal" id="transRev"><div class="rl">🇫🇷 Correct antwoord:</div><div class="rt" id="transRevTxt"></div></div>
+    <div class="warn-box" id="transWarn" style="display:none">⚠️ Spraakherkenning niet beschikbaar.</div>
+    <div id="transMicWrap">
+      <div class="mic-wrap"><button class="mic-btn" id="transMic" onclick="toggleTransRec()">🎤</button><div class="mic-lbl" id="transLbl">Tik op de microfoon en spreek Frans</div></div>
+    </div>
+    <div class="fb" id="transFb">
+      <div class="fb-head"><div class="fb-verdict" id="transVerdict"></div><div class="fb-score" id="transScore"></div></div>
+      <div class="fb-bar"><div class="fb-bar-fill" id="transBar" style="width:0%"></div></div>
+      <div class="fb-heard" id="transHeard"></div>
+      <div class="chips" id="transChips"></div>
+      <div class="fb-missed" id="transMissed"></div>
+      <div class="fb-tip" id="transTip"><strong>💡 Uitspraaktop</strong><span id="transTipText"></span></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-gray" onclick="transPrev()">← Vorige</button>
+    <button class="btn btn-orange" onclick="transNext()">Volgende →</button>
+  </div>
+</div>
+
+<!-- VOCAB CATS -->
+<div class="screen" id="screen-vocab-cats">
+  <div class="sec">Kies een categorie</div>
+  <div class="cat-grid" id="vocabCatGrid"></div>
+</div>
+
+<!-- VOCAB PRACTICE -->
+<div class="screen" id="screen-vocab">
+  <div class="counter" id="vocabCtr">Woord 1 / 12</div>
+  <div class="prog-bar"><div class="prog-fill" id="vocabProg" style="width:0%"></div></div>
+  <div class="vcard" id="vocabCard">
+    <div id="vocabStep1">
+      <div class="vcard-label">📝 Stap 1: Vertaal naar Frans</div>
+      <div class="vcard-nl" id="vocabNl"></div>
+      <div class="ig"><label>🇫🇷 Typ het Franse woord</label><input id="vocabInput" type="text" placeholder="Type hier..." autocomplete="off" autocorrect="off" spellcheck="false"/></div>
+      <button class="btn btn-brand" onclick="checkVocab()">✅ Controleer</button>
+      <button class="btn btn-gray" onclick="vocabSkip()">⏭ Sla over / Toon antwoord</button>
+      <div class="vcard-answer" id="vocabAnswer"><div class="al">✅ Correct Frans:</div><div class="at" id="vocabAnswerTxt"></div></div>
+      <div class="vcard-wrong" id="vocabWrong"><div class="wl" id="vocabWrongTxt"></div></div>
+    </div>
+    <div id="vocabStep2" style="display:none">
+      <div class="pron-step-banner">🎤 Stap 2: Spreek het woord correct uit!</div>
+      <div style="font-size:26px;font-weight:800;color:var(--brand);text-align:center;margin-bottom:4px" id="vocabPronFr"></div>
+      <div style="color:var(--gray);font-size:13px;text-align:center;margin-bottom:14px" id="vocabPronNl"></div>
+      <button class="btn btn-gray" onclick="speakVocab()">🔊 Luister</button>
+      <div class="warn-box" id="vocabWarnSpeech" style="display:none">⚠️ Spraakherkenning niet beschikbaar.</div>
+      <div id="vocabMicWrap">
+        <div class="mic-wrap"><button class="mic-btn" id="vocabMic" onclick="toggleVocabRec()">🎤</button><div class="mic-lbl" id="vocabLbl">Tik op de microfoon en spreek</div></div>
+      </div>
+      <div class="pron-pass-banner" id="vocabPassBanner">✅ Parfait! Correct uitgesproken!</div>
+      <div class="attempts-note" id="vocabAttNote"></div>
+      <div class="fb" id="vocabFb">
+        <div class="fb-head"><div class="fb-verdict" id="vocabVerdict"></div><div class="fb-score" id="vocabScore"></div></div>
+        <div class="fb-bar"><div class="fb-bar-fill" id="vocabBar" style="width:0%"></div></div>
+        <div class="fb-heard" id="vocabHeard"></div>
+        <div class="fb-tip" id="vocabTip"><strong>💡 Uitspraaktop</strong><span id="vocabTipText"></span></div>
+      </div>
+      <button class="btn btn-green" id="vocabNextBtn" onclick="vocabNext()" style="display:none;margin-top:4px">Volgende woord →</button>
+      <button class="btn btn-gray btn-sm" id="vocabSkipBtn" onclick="vocabNext()" style="display:none">Toch verder → (na 3 pogingen)</button>
+    </div>
+  </div>
+</div>
+
+<!-- SENTENCE MANAGER (per category) -->
+<div class="screen" id="screen-manage">
+  <div class="info-card" id="manageCatInfo"></div>
+  <div class="sec-hdr">
+    <span class="sec">Zinnen in deze categorie</span>
+    <span class="hidden-count" id="hiddenCount"></span>
+  </div>
+  <div id="manageList"></div>
+  <div class="sec" style="margin-top:16px">Zin toevoegen</div>
+  <div style="background:#fff;border-radius:var(--radius);padding:14px;box-shadow:var(--card-shadow);margin-bottom:12px">
+    <div class="ig"><label>🇫🇷 Frans *</label><input id="mgFr" placeholder="Bijv. Je voudrais..." autocorrect="off" autocomplete="off"/></div>
+    <div class="ig" style="margin-bottom:6px"><label>🇳🇱 Nederlands</label><input id="mgNl" placeholder="Bijv. Ik wil graag..."/></div>
+    <button class="btn btn-brand" onclick="addMgItem()" style="margin-bottom:0">➕ Toevoegen</button>
+  </div>
+  <div class="sec">Gedeelde zinnen van andere gebruikers</div>
+  <div id="communityList"></div>
+</div>
+
+<!-- ADD CUSTOM CATEGORY -->
+<div class="screen" id="screen-add-cat">
+  <div class="info-card"><strong>Nieuw onderwerp aanmaken</strong><br>Maak een eigen categorie met zinnen of woorden.</div>
+  <div class="ig"><label>📂 Naam van het onderwerp *</label><input id="acName" placeholder="Bijv. Op het vliegveld" maxlength="40"/></div>
+  <div class="ig"><label>Emoji icoon</label><input id="acIcon" placeholder="✈️" maxlength="3" style="width:80px"/></div>
+  <div class="sec">Zinnen of woorden</div>
+  <div id="acItemsList"></div>
+  <div style="background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+    <div class="ig"><label>🇫🇷 Frans *</label><input id="acFr" placeholder="Bijv. Je voudrais..." autocorrect="off" autocomplete="off"/></div>
+    <div class="ig" style="margin-bottom:6px"><label>🇳🇱 Nederlands</label><input id="acNl" placeholder="Bijv. Ik wil graag..."/></div>
+    <button class="btn btn-brand-o" onclick="addAcItem()" style="margin-bottom:0">➕ Voeg toe aan lijst</button>
+  </div>
+  <button class="btn btn-brand" onclick="saveAc()">💾 Onderwerp opslaan</button>
+  <button class="btn btn-gray" onclick="goBack()">Annuleren</button>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-ctr" id="quizCtr">Vraag 1 / 10</div>
+  <div class="prog-bar"><div class="prog-fill" id="quizProg" style="width:0%"></div></div>
+  <div class="quiz-q-card"><div class="quiz-label" id="quizLabel"></div><div class="quiz-question" id="quizQ"></div></div>
+  <div class="quiz-options" id="quizOpts"></div>
+</div>
+
+<!-- SCORE -->
+<div class="screen" id="screen-score">
+  <div class="score-wrap">
+    <div class="score-emoji" id="scoreEmoji">🎉</div>
+    <h2 class="score-title" id="scoreTitle">Geweldig!</h2>
+    <p class="score-sub" id="scoreSub"></p>
+    <div class="score-circle"><div class="score-num" id="scoreNum">—</div></div>
+    <button class="btn btn-brand" onclick="goHome()">🏠 Naar home</button>
+    <button class="btn btn-brand-o" onclick="repeatLast()">🔁 Herhalen</button>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen" id="screen-profile">
+  <div class="profile-header">
+    <div class="profile-photo-wrap" id="profilePhotoWrap">
+      <div class="profile-av-large" id="profileAv">👤</div>
+      <div class="profile-photo-edit">✏️<input type="file" accept="image/*" onchange="changeProfilePhoto(this)"></div>
+    </div>
+    <div class="profile-name" id="profileName">—</div>
+    <div class="profile-sub" id="profileSub">Bezig met Frans leren</div>
+  </div>
+  <div class="profile-stat-grid">
+    <div class="ps-card"><div class="pv" id="psSCards">0</div><div class="pl">💬 Gesprek</div></div>
+    <div class="ps-card"><div class="pv" id="psPron">0</div><div class="pl">🎤 Uitspraak</div></div>
+    <div class="ps-card"><div class="pv" id="psTrans">0</div><div class="pl">🔄 Vertalen</div></div>
+    <div class="ps-card"><div class="pv" id="psVocab">0</div><div class="pl">📝 Woorden</div></div>
+    <div class="ps-card"><div class="pv" id="psStreak">0</div><div class="pl">🔥 Reeks</div></div>
+    <div class="ps-card"><div class="pv" id="psCats">0</div><div class="pl">📂 Categorieën</div></div>
+  </div>
+  <div class="sec">Sync naar ander apparaat</div>
+  <p style="font-size:12px;color:var(--gray);margin-bottom:10px">Genereer een QR-code of kopieer de sync code. Open de app op je andere apparaat en gebruik "Importeer account".</p>
+  <div id="profileSyncCode" style="margin-bottom:10px"></div>
+  <button class="btn btn-brand-o" onclick="showQrModal()" style="margin-bottom:9px">📱 Toon QR-code / sync code</button>
+  <div class="sec">Account</div>
+  <button class="btn btn-gray" onclick="switchAccount()">🔄 Account wisselen</button>
+  <button class="btn btn-red" onclick="deleteAccount()">🗑️ Account verwijderen</button>
+</div>
+
+<script>
+// ══ QR / SYNC CODE ═══════════════════════════════════════════
+function makeSyncPayload(){
+  const u=db.users.find(u=>u.id===curId);
+  const s=ud.stats;
+  // Compact: essentiële data, geen foto (te groot voor QR)
+  return {v:1,n:u.name,a:u.avatar||'',h:u.pwHash||'',sc:u.syncCode||'',
+          s:[s.cards,s.pron,s.trans,s.vocab,s.streak,s.lastDate||'']};
+}
+function encodeSyncPayload(p){return btoa(unescape(encodeURIComponent(JSON.stringify(p))));}
+function decodeSyncPayload(code){return JSON.parse(decodeURIComponent(escape(atob(code.trim()))));}
+
+let qrInstance=null;
+function showQrModal(){
+  if(!curId)return;
+  const payload=makeSyncPayload();
+  const code=encodeSyncPayload(payload);
+  document.getElementById('qrTextVal').textContent=code;
+  const wrap=document.getElementById('qrCanvas');
+  wrap.innerHTML='';
+  try{
+    qrInstance=new QRCode(wrap,{text:code,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){wrap.innerHTML='<p style="font-size:12px;color:var(--gray)">QR-code kon niet worden gegenereerd. Gebruik de tekst-code.</p>';}
+  document.getElementById('qrModal').classList.add('open');
+}
+function hideQrModal(){document.getElementById('qrModal').classList.remove('open');}
+function copyQrCode(){
+  const val=document.getElementById('qrTextVal').textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(val).then(()=>{
+    const btn=document.querySelector('.sync-copy-btn');
+    btn.textContent='✓ Gekopieerd!';setTimeout(()=>btn.textContent='Kopiëren',2000);
+  });}else{
+    const ta=document.createElement('textarea');ta.value=val;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  }
+}
+
+function importAccount(){
+  const raw=(document.getElementById('importCodeField').value||'').trim();
+  const pw=document.getElementById('importPwField').value;
+  const errEl=document.getElementById('importError');
+  errEl.style.display='none';
+  function showErr(msg){errEl.textContent=msg;errEl.style.display='block';}
+  if(!raw)return showErr('Plak eerst een sync code.');
+  if(!pw)return showErr('Voer je wachtwoord in.');
+  let payload;
+  try{payload=decodeSyncPayload(raw);}
+  catch(e){return showErr('Ongeldige sync code. Zorg dat je de volledige code hebt geplakt.');}
+  if(!payload.n||!payload.h)return showErr('Sync code is onvolledig.');
+  if(hashPw(pw)!==payload.h)return showErr('Onjuist wachtwoord.');
+  // Maak lokaal account aan of update bestaand (match op syncCode of naam+hash)
+  let u=db.users.find(u=>(payload.sc&&u.syncCode===payload.sc)||(u.pwHash===payload.h&&u.name===payload.n));
+  if(!u){
+    const id='u'+Date.now();
+    u={id,name:payload.n,avatar:payload.a||'🎓',pwHash:payload.h,syncCode:payload.sc||''};
+    db.users.push(u);saveDB(db);
+  }
+  const [cards,pron,trans,vocab,streak,lastDate]=payload.s||[0,0,0,0,0,''];
+  const localUd=loadUD(u.id);
+  // Overschrijf stats alleen als die uit sync nieuwer/hoger zijn
+  if(cards>localUd.stats.cards)localUd.stats.cards=cards;
+  if(pron>localUd.stats.pron)localUd.stats.pron=pron;
+  if(trans>localUd.stats.trans)localUd.stats.trans=trans;
+  if(vocab>localUd.stats.vocab)localUd.stats.vocab=vocab;
+  if(streak>localUd.stats.streak){localUd.stats.streak=streak;localUd.stats.lastDate=lastDate;}
+  saveUD(u.id,localUd);
+  document.getElementById('importCodeField').value='';
+  document.getElementById('importPwField').value='';
+  loginAs(u.id);
+}
+
+// ══ WACHTWOORD VALIDATIE ══════════════════════════════════════
+function checkPw(pw){
+  return{
+    len: pw.length>=8,
+    upper: /[A-Z]/.test(pw),
+    special: /[^A-Za-z0-9]/.test(pw)
+  };
+}
+function isPwValid(pw){const c=checkPw(pw);return c.len&&c.upper&&c.special;}
+function renderPwReqs(pw){
+  const reqs=document.getElementById('pwReqs');
+  if(!reqs)return;
+  reqs.classList.toggle('show',pw.length>0);
+  const c=checkPw(pw);
+  document.getElementById('req-len').classList.toggle('ok',c.len);
+  document.getElementById('req-upper').classList.toggle('ok',c.upper);
+  document.getElementById('req-special').classList.toggle('ok',c.special);
+}
+
+// ══ DATA – PHRASES ══════════════════════════════════════════
+const PHRASES={
+  begroeting:{label:"Begroeten & Afscheid",icon:"👋",phrases:[
+    {fr:"Bonjour !",nl:"Hallo! Goedendag!",ctx:"Begroeting overdag"},
+    {fr:"Bonsoir !",nl:"Goedenavond!",ctx:"Begroeting 's avonds"},
+    {fr:"Salut !",nl:"Hoi! Doei!",ctx:"Informeel"},
+    {fr:"Comment allez-vous ?",nl:"Hoe gaat het met u?",ctx:"Formeel"},
+    {fr:"Comment tu vas ?",nl:"Hoe gaat het met jou?",ctx:"Informeel"},
+    {fr:"Ça va bien, merci !",nl:"Het gaat goed, dank je!"},
+    {fr:"Au revoir !",nl:"Tot ziens!"},
+    {fr:"À bientôt !",nl:"Tot snel!"},
+    {fr:"Enchanté !",nl:"Aangenaam kennis te maken!"},
+    {fr:"Je m'appelle Pierre.",nl:"Ik heet Pierre."},
+  ]},
+  restaurant:{label:"In het restaurant",icon:"🍽️",phrases:[
+    {fr:"Une table pour deux, s'il vous plaît.",nl:"Een tafel voor twee, alstublieft."},
+    {fr:"Je voudrais voir la carte.",nl:"Ik wil graag het menu zien."},
+    {fr:"Qu'est-ce que vous recommandez ?",nl:"Wat raadt u aan?"},
+    {fr:"Je suis allergique aux noix.",nl:"Ik ben allergisch voor noten."},
+    {fr:"L'addition, s'il vous plaît !",nl:"De rekening, alstublieft!"},
+    {fr:"C'était délicieux !",nl:"Het was heerlijk!"},
+    {fr:"Je voudrais un verre de vin rouge.",nl:"Ik wil graag een glas rode wijn."},
+    {fr:"Sans gluten, s'il vous plaît.",nl:"Zonder gluten, alstublieft."},
+    {fr:"Le plat du jour, c'est quoi ?",nl:"Wat is het dagmenu?"},
+    {fr:"Vous avez une entrée végétarienne ?",nl:"Heeft u een vegetarisch voorgerecht?"},
+  ]},
+  richting:{label:"De weg vragen",icon:"🗺️",phrases:[
+    {fr:"Excusez-moi, où est la gare ?",nl:"Pardon, waar is het station?"},
+    {fr:"C'est loin d'ici ?",nl:"Is het ver hiervandaan?"},
+    {fr:"Tournez à gauche.",nl:"Sla links af."},
+    {fr:"Continuez tout droit.",nl:"Ga rechtdoor."},
+    {fr:"Prenez la première rue à droite.",nl:"Neem de eerste straat rechts."},
+    {fr:"C'est à combien de minutes à pied ?",nl:"Hoeveel minuten te voet?"},
+    {fr:"Y a-t-il une pharmacie près d'ici ?",nl:"Is er een apotheek in de buurt?"},
+    {fr:"Je suis perdu.",nl:"Ik ben verdwaald."},
+    {fr:"Pouvez-vous me montrer sur la carte ?",nl:"Kunt u het op de kaart aanwijzen?"},
+    {fr:"Quel bus va au centre-ville ?",nl:"Welke bus gaat naar het stadscentrum?"},
+  ]},
+  winkel:{label:"Winkelen",icon:"🛍️",phrases:[
+    {fr:"Combien ça coûte ?",nl:"Hoeveel kost dat?"},
+    {fr:"Je cherche une veste en cuir.",nl:"Ik zoek een leren jas."},
+    {fr:"Vous avez ça en taille M ?",nl:"Heeft u dat in maat M?"},
+    {fr:"Est-ce que je peux l'essayer ?",nl:"Mag ik het passen?"},
+    {fr:"C'est trop cher pour moi.",nl:"Dat is te duur voor mij."},
+    {fr:"Je vais le prendre.",nl:"Ik neem het."},
+    {fr:"Vous acceptez la carte bancaire ?",nl:"Accepteert u een betaalkaart?"},
+    {fr:"Je voudrais un remboursement.",nl:"Ik wil graag een terugbetaling."},
+    {fr:"Avez-vous quelque chose de moins cher ?",nl:"Heeft u iets goedkopers?"},
+    {fr:"Je regarde, merci.",nl:"Ik kijk alleen, dank u."},
+  ]},
+  school:{label:"Op school",icon:"📚",phrases:[
+    {fr:"Je ne comprends pas.",nl:"Ik begrijp het niet."},
+    {fr:"Pouvez-vous répéter, s'il vous plaît ?",nl:"Kunt u dat herhalen?"},
+    {fr:"Qu'est-ce que ça veut dire ?",nl:"Wat betekent dat?"},
+    {fr:"Comment dit-on ça en français ?",nl:"Hoe zeg je dat in het Frans?"},
+    {fr:"Je dois étudier pour l'examen.",nl:"Ik moet studeren voor het examen."},
+    {fr:"Mon professeur est très sympa.",nl:"Mijn leraar is erg aardig."},
+    {fr:"J'ai raté mon examen.",nl:"Ik heb mijn examen niet gehaald."},
+    {fr:"Je suis fort en mathématiques.",nl:"Ik ben goed in wiskunde."},
+    {fr:"Quelle est la date limite ?",nl:"Wat is de deadline?"},
+    {fr:"Peut-on travailler en groupe ?",nl:"Mogen we in groep werken?"},
+  ]},
+  gevoelens:{label:"Gevoelens & Meningen",icon:"💭",phrases:[
+    {fr:"Je suis d'accord avec toi.",nl:"Ik ben het met je eens."},
+    {fr:"Je ne suis pas d'accord.",nl:"Ik ben het er niet mee eens."},
+    {fr:"À mon avis, c'est une bonne idée.",nl:"Naar mijn mening is het een goed idee."},
+    {fr:"Je suis très content !",nl:"Ik ben heel blij!"},
+    {fr:"C'est dommage.",nl:"Dat is jammer."},
+    {fr:"J'adore la musique française.",nl:"Ik hou heel erg van Franse muziek."},
+    {fr:"Je n'aime pas trop les épinards.",nl:"Ik houd niet zo van spinazie."},
+    {fr:"Je me sens fatigué.",nl:"Ik voel me moe."},
+    {fr:"Quelle bonne surprise !",nl:"Wat een aangename verrassing!"},
+    {fr:"Je trouve ça vraiment intéressant.",nl:"Ik vind dat echt interessant."},
+  ]},
+};
+
+// ══ DATA – VOCAB ═════════════════════════════════════════════
+const VOCAB={
+  familie:{label:"Familie",icon:"👨‍👩‍👧",words:[
+    {nl:"vader",fr:"le père"},{nl:"moeder",fr:"la mère"},{nl:"broer",fr:"le frère"},
+    {nl:"zus",fr:"la sœur"},{nl:"kind",fr:"l'enfant"},{nl:"baby",fr:"le bébé"},
+    {nl:"oom",fr:"l'oncle"},{nl:"tante",fr:"la tante"},{nl:"neef",fr:"le cousin"},
+    {nl:"nicht",fr:"la cousine"},{nl:"grootvader",fr:"le grand-père"},{nl:"grootmoeder",fr:"la grand-mère"},
+  ]},
+  kleuren:{label:"Kleuren",icon:"🎨",words:[
+    {nl:"rood",fr:"rouge"},{nl:"blauw",fr:"bleu"},{nl:"groen",fr:"vert"},
+    {nl:"geel",fr:"jaune"},{nl:"zwart",fr:"noir"},{nl:"wit",fr:"blanc"},
+    {nl:"oranje",fr:"orange"},{nl:"paars",fr:"violet"},{nl:"roze",fr:"rose"},
+    {nl:"bruin",fr:"marron"},{nl:"grijs",fr:"gris"},{nl:"lichtblauw",fr:"bleu clair"},
+  ]},
+  eten:{label:"Eten & Drinken",icon:"🍎",words:[
+    {nl:"brood",fr:"le pain"},{nl:"melk",fr:"le lait"},{nl:"water",fr:"l'eau"},
+    {nl:"kaas",fr:"le fromage"},{nl:"vlees",fr:"la viande"},{nl:"vis",fr:"le poisson"},
+    {nl:"appel",fr:"la pomme"},{nl:"kip",fr:"le poulet"},{nl:"ei",fr:"l'œuf"},
+    {nl:"soep",fr:"la soupe"},{nl:"salade",fr:"la salade"},{nl:"aardappel",fr:"la pomme de terre"},
+  ]},
+  cijfers:{label:"Cijfers",icon:"🔢",words:[
+    {nl:"één",fr:"un"},{nl:"twee",fr:"deux"},{nl:"drie",fr:"trois"},
+    {nl:"vier",fr:"quatre"},{nl:"vijf",fr:"cinq"},{nl:"zes",fr:"six"},
+    {nl:"zeven",fr:"sept"},{nl:"acht",fr:"huit"},{nl:"negen",fr:"neuf"},
+    {nl:"tien",fr:"dix"},{nl:"twintig",fr:"vingt"},{nl:"honderd",fr:"cent"},
+  ]},
+  lichaam:{label:"Lichaam",icon:"🧍",words:[
+    {nl:"hoofd",fr:"la tête"},{nl:"oog",fr:"l'œil"},{nl:"oor",fr:"l'oreille"},
+    {nl:"neus",fr:"le nez"},{nl:"mond",fr:"la bouche"},{nl:"hand",fr:"la main"},
+    {nl:"arm",fr:"le bras"},{nl:"been",fr:"la jambe"},{nl:"voet",fr:"le pied"},
+    {nl:"rug",fr:"le dos"},{nl:"buik",fr:"le ventre"},{nl:"hart",fr:"le cœur"},
+  ]},
+  school:{label:"School",icon:"📚",words:[
+    {nl:"boek",fr:"le livre"},{nl:"pen",fr:"le stylo"},{nl:"schrift",fr:"le cahier"},
+    {nl:"tafel",fr:"la table"},{nl:"stoel",fr:"la chaise"},{nl:"school",fr:"l'école"},
+    {nl:"leraar",fr:"le professeur"},{nl:"klas",fr:"la classe"},{nl:"examen",fr:"l'examen"},
+    {nl:"huiswerk",fr:"les devoirs"},{nl:"vak",fr:"la matière"},{nl:"cijfer",fr:"la note"},
+  ]},
+  tijd:{label:"Tijd & Dagen",icon:"🕐",words:[
+    {nl:"dag",fr:"le jour"},{nl:"week",fr:"la semaine"},{nl:"maand",fr:"le mois"},
+    {nl:"jaar",fr:"l'année"},{nl:"ochtend",fr:"le matin"},{nl:"avond",fr:"le soir"},
+    {nl:"vandaag",fr:"aujourd'hui"},{nl:"morgen",fr:"demain"},{nl:"gisteren",fr:"hier"},
+    {nl:"nu",fr:"maintenant"},{nl:"later",fr:"plus tard"},{nl:"altijd",fr:"toujours"},
+  ]},
+  werk:{label:"Beroepen",icon:"💼",words:[
+    {nl:"dokter",fr:"le médecin"},{nl:"leraar",fr:"le professeur"},{nl:"student",fr:"l'étudiant"},
+    {nl:"ingenieur",fr:"l'ingénieur"},{nl:"kok",fr:"le cuisinier"},{nl:"politieagent",fr:"le policier"},
+    {nl:"verpleegkundige",fr:"l'infirmier"},{nl:"advocaat",fr:"l'avocat"},{nl:"piloot",fr:"le pilote"},
+    {nl:"journalist",fr:"le journaliste"},{nl:"architect",fr:"l'architecte"},{nl:"boer",fr:"l'agriculteur"},
+  ]},
+};
+
+// ══ SOUND RULES ══════════════════════════════════════════════
+const SOUND_RULES=[
+  {t:fr=>/ch/i.test(fr),           tip:'Spreek "ch" uit als "sj" (zoals "sjaal") — nooit als "ch" of "k".'},
+  {t:fr=>/ou/i.test(fr),           tip:'Spreek "ou" uit als "oe" (zoals in "boek"), niet als "ow".'},
+  {t:fr=>/oi/i.test(fr),           tip:'Spreek "oi" uit als "wa" — bijv. "moi" → "mwa", "voilà" → "wala".'},
+  {t:fr=>/eau|(?<![aeiou])au/i.test(fr), tip:'Spreek "eau" en "au" uit als een gewone "o".'},
+  {t:fr=>/gn/i.test(fr),           tip:'Spreek "gn" uit als "nj" (zoals "Spanje"). "magnifique" → "manjiefiek".'},
+  {t:fr=>/ille/i.test(fr),         tip:'Spreek "-ille" uit als "-ij" — "fille" → "fij", "famille" → "famij".'},
+  {t:fr=>/eu(?!r)/i.test(fr),      tip:'Spreek "eu" uit met ronde lippen, zoals de "eu" in "deur" of "neus".'},
+  {t:fr=>/(an|am)[^aeiou\s]|(an|am)\b/i.test(fr), tip:'Spreek "an"/"am" nasaal uit: zeg het door je neus, de "n" klinkt NIET apart.'},
+  {t:fr=>/(en|em)[^aeiou\s]|(en|em)\b/i.test(fr), tip:'Spreek "en"/"em" nasaal uit (door neus), de "n" klinkt niet apart.'},
+  {t:fr=>/(on|om)[^aeiou\s]|(on|om)\b/i.test(fr), tip:'Spreek "on"/"om" nasaal uit, als "ong" maar zonder de "ng" te zeggen.'},
+  {t:fr=>/(in|im|ain|ein)[^aeiou\s]|(in|im|ain|ein)\b/i.test(fr), tip:'Spreek "in"/"ain"/"ein" nasaal uit (door neus), zonder de "n" apart.'},
+  {t:fr=>/\b\w+[ts]\b/i.test(fr),  tip:'De "t" en "s" aan het einde van een woord spreek je NIET uit, tenzij het volgende woord met een klinker begint.'},
+  {t:fr=>/é/i.test(fr),            tip:'Spreek "é" (accent aigu) uit als een scherpe "ee" — zoals in "café".'},
+  {t:fr=>/[èê]/i.test(fr),         tip:'Spreek "è" of "ê" uit als een open "e", zoals "eh".'},
+  {t:fr=>/\bu(?!e|i)/i.test(fr),   tip:'De Franse "u" bestaat niet in het Nederlands: doe een "ie"-mond maar zeg "uu" (tuit je lippen).'},
+  {t:fr=>/r/i.test(fr),            tip:'De Franse "r" is een keelklank — maak het geluid achterin je keel, als een zachte "g".'},
+];
+function getSoundTip(fr){for(const r of SOUND_RULES)if(r.t(fr))return r.tip;return null;}
+
+const AVATARS=['🎓','🦊','🐬','🌟','🎵','🦋','🐯','🌈','🎨','🏆','🦁','🐙'];
+
+// ── SIMPLE HASH (djb2, not cryptographic — sufficient for local use) ──
+function hashPw(str){
+  let h=5381;
+  for(let i=0;i<str.length;i++){h=Math.imul((h<<5)+h,1)^str.charCodeAt(i);}
+  return (h>>>0).toString(16);
+}
+
+// ── PHOTO HANDLING ──
+let newUserPhoto=null;
+function handlePhotoSelect(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    newUserPhoto=e.target.result;
+    const prev=document.getElementById('newPhotoPreview');
+    const ph=document.getElementById('newPhotoPlaceholder');
+    if(prev){prev.src=newUserPhoto;prev.style.display='block';}
+    if(ph)ph.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+function changeProfilePhoto(input){
+  const file=input.files[0];if(!file||!curId)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const u=db.users.find(u=>u.id===curId);
+    if(!u)return;
+    u.photo=e.target.result;
+    saveDB(db);
+    updateNavAvatar(u);
+    renderProfile();
+  };
+  reader.readAsDataURL(file);
+}
+function updateNavAvatar(u){
+  const inner=document.getElementById('navAvatarInner');
+  if(!inner)return;
+  if(u.photo){
+    inner.innerHTML=`<img src="${u.photo}" class="nav-avatar-img">`;
+  } else {
+    inner.textContent=u.avatar||u.name[0];
+  }
+}
+
+// ══ CONSTANTS ═══════════════════════════════════════════════
+const PASS_THRESHOLD=95;
+const MAX_ATTEMPTS=3;
+const WORD_MATCH_THRESHOLD=0.85; // strenger dan voorheen (was 0.75)
+
+// ══ STORAGE & ACCOUNTS ══════════════════════════════════════
+function loadDB(){return JSON.parse(localStorage.getItem('fr_db')||'{"users":[],"cur":null}')}
+function saveDB(d){localStorage.setItem('fr_db',JSON.stringify(d))}
+function loadUD(id){
+  const raw=localStorage.getItem('fr_ud_'+id);
+  const d=raw?JSON.parse(raw):{stats:{cards:0,pron:0,trans:0,vocab:0,streak:0,lastDate:''},customCats:[],deletedBuiltin:{},catAdditions:{}};
+  if(!d.customCats)d.customCats=[];
+  if(!d.deletedBuiltin)d.deletedBuiltin={};
+  if(!d.catAdditions)d.catAdditions={};
+  if(d.custom&&d.custom.length&&!d.customCats.find(c=>c.id==='migrated')){
+    d.customCats.unshift({id:'migrated',name:'Mijn zinnen',icon:'✏️',items:d.custom});
+  }
+  return d;
+}
+function saveUD(id,d){localStorage.setItem('fr_ud_'+id,JSON.stringify(d))}
+function loadCommunity(){return JSON.parse(localStorage.getItem('fr_community')||'[]')}
+function saveCommunity(c){localStorage.setItem('fr_community',JSON.stringify(c))}
+
+// ── GROUPS STORAGE ──
+function loadGroups(){return JSON.parse(localStorage.getItem('fr_groups')||'[]')}
+function saveGroups(g){localStorage.setItem('fr_groups',JSON.stringify(g))}
+function myGroups(){return loadGroups().filter(g=>g.members.some(m=>m.id===curId));}
+
+function renderHomeGroups(){
+  const el=document.getElementById('homeGroupList');if(!el)return;
+  const groups=myGroups();
+  if(!groups.length){
+    el.innerHTML=`<div class="empty" style="padding:18px 0 6px"><div class="ei">👥</div>Je zit nog in geen groep.<br>Maak er een aan of zoek een bestaande.</div>`;
+    return;
+  }
+  el.innerHTML='';
+  groups.forEach(g=>{
+    const card=document.createElement('div');card.className='group-card';
+    card.innerHTML=`
+      <div class="group-icon">${g.icon||'📚'}</div>
+      <div class="group-info">
+        <div class="group-name">${g.name}</div>
+        <div class="group-meta">${g.members.length} lid${g.members.length!==1?'en':''} · ${g.phrases.length} zin${g.phrases.length!==1?'nen':''}</div>
+      </div>
+      <div class="group-right">
+        <span class="${g.isPublic?'group-badge-pub':'group-badge-priv'}">${g.isPublic?'Openbaar':'Privé'}</span>
+        <span class="group-arr">›</span>
+      </div>
+    `;
+    card.onclick=()=>openGroup(g.id);
+    el.appendChild(card);
+  });
+}
+
+let db=loadDB(),curId=db.cur,ud=curId?loadUD(curId):null;
+
+// ══ GROEPEN ══════════════════════════════════════════════════
+let activeGroupId=null;
+
+function randCode(){
+  return Math.random().toString(36).toUpperCase().substring(2,8);
+}
+
+function createGroup(){
+  const name=document.getElementById('gcName').value.trim();
+  if(!name)return alert('Geef de groep een naam.');
+  const icon=(document.getElementById('gcIcon').value.trim()||'📚');
+  const u=db.users.find(u=>u.id===curId);
+  const groups=loadGroups();
+  const g={
+    id:'g'+Date.now(),
+    name,icon,
+    ownerId:curId,
+    members:[{id:curId,name:u.name,avatar:u.avatar,photo:u.photo||null}],
+    phrases:[],
+    isPublic:false,
+    code:randCode()
+  };
+  groups.push(g);saveGroups(groups);
+  document.getElementById('gcName').value='';
+  document.getElementById('gcIcon').value='';
+  document.getElementById('gcIconPreview').textContent='📚';
+  openGroup(g.id);
+}
+
+function openGroup(id){
+  activeGroupId=id;
+  const g=loadGroups().find(g=>g.id===id);
+  showScreen('screen-group-detail',g?g.name:'Groep');
+}
+
+function renderGroupDetail(){
+  const g=loadGroups().find(g=>g.id===activeGroupId);
+  if(!g)return;
+  const isOwner=g.ownerId===curId;
+
+  setEl('gdName',g.name);
+  setEl('gdCode',g.code);
+  document.getElementById('gdIcon').textContent=g.icon||'📚';
+  document.getElementById('gdMeta',`${g.members.length} lid${g.members.length!==1?'en':''} · ${g.phrases.length} zin${g.phrases.length!==1?'nen':''}`);
+  const metaEl=document.getElementById('gdMeta');
+  if(metaEl)metaEl.textContent=`${g.members.length} lid${g.members.length!==1?'en':''} · ${g.phrases.length} zin${g.phrases.length!==1?'nen':''}`;
+
+  // Toggle zichtbaar voor eigenaar
+  const toggleRow=document.getElementById('gdToggleRow');
+  if(toggleRow)toggleRow.style.display=isOwner?'flex':'none';
+  const toggle=document.getElementById('gdPublicToggle');
+  if(toggle)toggle.checked=g.isPublic;
+
+  // Leden
+  const membersEl=document.getElementById('gdMembers');
+  if(membersEl){
+    membersEl.innerHTML='';
+    g.members.forEach(m=>{
+      const chip=document.createElement('div');
+      chip.className='member-chip'+(m.id===g.ownerId?' owner':'');
+      const avHtml=m.photo
+        ?`<div class="member-chip-av"><img src="${m.photo}"></div>`
+        :`<div class="member-chip-av">${m.avatar||m.name[0]}</div>`;
+      chip.innerHTML=`${avHtml}<span>${m.name}${m.id===g.ownerId?' 👑':''}</span>`;
+      membersEl.appendChild(chip);
+    });
+  }
+
+  // Verlaat-knop verbergen voor eigenaar (kan niet verlaten, wel verwijderen)
+  const leaveBtn=document.getElementById('gdLeaveBtn');
+  if(leaveBtn)leaveBtn.textContent=isOwner?'🗑️ Groep verwijderen':'🚪 Groep verlaten';
+
+  // Zinnen
+  setEl('gdPhraseCount',g.phrases.length+' zin'+(g.phrases.length!==1?'nen':''));
+  const phEl=document.getElementById('gdPhrases');
+  if(phEl){
+    if(!g.phrases.length){
+      phEl.innerHTML='<div class="empty" style="padding:12px 0"><div class="ei">📝</div>Nog geen zinnen — voeg de eerste toe!</div>';
+    }else{
+      phEl.innerHTML='';
+      g.phrases.forEach(p=>{
+        const row=document.createElement('div');row.className='group-phrase-row';
+        const canDel=p.addedBy===curId||isOwner;
+        row.innerHTML=`
+          <div class="group-phrase-text">
+            <div class="group-phrase-fr">${p.fr}</div>
+            ${p.nl?`<div class="group-phrase-nl">${p.nl}</div>`:''}
+            <div class="group-phrase-by">Toegevoegd door ${p.addedByName}</div>
+          </div>
+          ${canDel?`<button class="del-btn" onclick="deleteGroupPhrase('${p.id}')">🗑</button>`:''}
+        `;
+        phEl.appendChild(row);
+      });
+    }
+  }
+}
+
+function toggleGroupPublic(){
+  const groups=loadGroups();
+  const g=groups.find(g=>g.id===activeGroupId);
+  if(!g||g.ownerId!==curId)return;
+  g.isPublic=document.getElementById('gdPublicToggle').checked;
+  saveGroups(groups);
+}
+
+function copyGroupCode(){
+  const g=loadGroups().find(g=>g.id===activeGroupId);
+  if(!g)return;
+  const text='Doe mee met mijn Frans-groep "'+g.name+'"! Code: '+g.code;
+  if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>alert('Code gekopieerd!'));
+  else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Code gekopieerd!');}
+}
+
+function addGroupPhrase(){
+  const fr=document.getElementById('gdFr').value.trim();
+  const nl=document.getElementById('gdNl').value.trim();
+  if(!fr)return alert('Vul de Franse zin in.');
+  const groups=loadGroups();
+  const g=groups.find(g=>g.id===activeGroupId);
+  if(!g)return;
+  const u=db.users.find(u=>u.id===curId);
+  g.phrases.push({id:'p'+Date.now(),fr,nl,addedBy:curId,addedByName:u?u.name:'?'});
+  saveGroups(groups);
+  document.getElementById('gdFr').value='';
+  document.getElementById('gdNl').value='';
+  renderGroupDetail();
+}
+
+function deleteGroupPhrase(pid){
+  const groups=loadGroups();
+  const g=groups.find(g=>g.id===activeGroupId);
+  if(!g)return;
+  g.phrases=g.phrases.filter(p=>p.id!==pid);
+  saveGroups(groups);
+  renderGroupDetail();
+}
+
+function leaveGroup(){
+  const groups=loadGroups();
+  const idx=groups.findIndex(g=>g.id===activeGroupId);
+  if(idx<0)return;
+  const g=groups[idx];
+  if(g.ownerId===curId){
+    if(!confirm('Weet je zeker dat je deze groep wilt verwijderen? Dit verwijdert alle zinnen en leden.'))return;
+    groups.splice(idx,1);
+  }else{
+    if(!confirm('Weet je zeker dat je de groep wilt verlaten?'))return;
+    g.members=g.members.filter(m=>m.id!==curId);
+  }
+  saveGroups(groups);
+  showTab('home');
+}
+
+function joinByCode(){
+  const code=(document.getElementById('groupJoinCode').value||'').trim().toUpperCase();
+  if(!code)return alert('Voer een code in.');
+  const groups=loadGroups();
+  const g=groups.find(g=>g.code===code);
+  if(!g)return alert('Geen groep gevonden met code "'+code+'". Controleer of je de code goed hebt ingevoerd.');
+  if(g.members.some(m=>m.id===curId)){
+    openGroup(g.id);return;
+  }
+  const u=db.users.find(u=>u.id===curId);
+  g.members.push({id:curId,name:u.name,avatar:u.avatar,photo:u.photo||null});
+  saveGroups(groups);
+  document.getElementById('groupJoinCode').value='';
+  openGroup(g.id);
+}
+
+function renderGroupSearch(){
+  const q=(document.getElementById('groupSearchQ').value||'').trim().toLowerCase();
+  const el=document.getElementById('groupSearchResults');if(!el)return;
+  const groups=loadGroups().filter(g=>g.isPublic);
+  const filtered=q?groups.filter(g=>g.name.toLowerCase().includes(q)):groups;
+  if(!filtered.length){
+    el.innerHTML='<div class="empty"><div class="ei">🔍</div>'+(q?'Geen openbare groepen gevonden.':'Er zijn nog geen openbare groepen.')+'</div>';
+    return;
+  }
+  el.innerHTML='';
+  filtered.forEach(g=>{
+    const isMember=g.members.some(m=>m.id===curId);
+    const card=document.createElement('div');card.className='search-result-card';
+    card.innerHTML=`
+      <div class="group-icon" style="width:40px;height:40px;border-radius:10px;font-size:20px">${g.icon||'📚'}</div>
+      <div class="search-result-info">
+        <div class="search-result-name">${g.name}</div>
+        <div class="search-result-meta">${g.members.length} lid${g.members.length!==1?'en':''} · ${g.phrases.length} zinnen</div>
+      </div>
+      <button class="btn ${isMember?'btn-brand-o':'btn-brand'} btn-sm" style="width:auto;margin:0" onclick="joinOrOpen('${g.id}')">${isMember?'Openen':'Joinen'}</button>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function joinOrOpen(id){
+  const groups=loadGroups();
+  const g=groups.find(g=>g.id===id);if(!g)return;
+  if(!g.members.some(m=>m.id===curId)){
+    const u=db.users.find(u=>u.id===curId);
+    g.members.push({id:curId,name:u.name,avatar:u.avatar,photo:u.photo||null});
+    saveGroups(groups);
+  }
+  openGroup(id);
+}
+
+// ══ AVATAR PICKER ════════════════════════════════════════════
+let selectedAvatar=AVATARS[0];
+function renderAvatarPicker(){
+  const el=document.getElementById('avatarPicker');el.innerHTML='';
+  AVATARS.forEach(a=>{
+    const d=document.createElement('div');d.className='avatar-opt'+(a===selectedAvatar?' sel':'');
+    d.textContent=a;d.onclick=()=>{selectedAvatar=a;renderAvatarPicker();};
+    el.appendChild(d);
+  });
+}
+
+// ══ ACCOUNTS ═════════════════════════════════════════════════
+function renderLogin(){
+  const el=document.getElementById('userList');el.innerHTML='';
+  renderAvatarPicker();
+  newUserPhoto=null;
+  const prev=document.getElementById('newPhotoPreview');
+  const ph=document.getElementById('newPhotoPlaceholder');
+  if(prev){prev.src='';prev.style.display='none';}
+  if(ph)ph.style.display='block';
+  if(!db.users.length){el.innerHTML='<div class="empty"><div class="ei">👤</div>Nog geen accounts — maak er hieronder een aan.</div>';return;}
+  db.users.forEach(u=>{
+    const d2=loadUD(u.id),s=d2.stats,total=s.cards+s.pron+s.trans+s.vocab;
+    const avatarHtml=u.photo
+      ?`<img src="${u.photo}" class="user-av-img">`
+      :`<div class="user-av">${u.avatar||u.name[0].toUpperCase()}</div>`;
+    const div=document.createElement('div');
+    div.className='auth-card';
+    div.innerHTML=`
+      <div class="user-card" onclick="promptLogin('${u.id}')">
+        ${avatarHtml}
+        <div class="user-info"><h4>${u.name}</h4><p>${total} oefeningen · 🔥 ${s.streak} dag(en)</p></div>
+        <div class="user-arr">›</div>
+      </div>
+      <div class="pw-row user-pw-row" id="pw-row-${u.id}" style="display:none">
+        <input type="password" id="pw-input-${u.id}" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')doLogin('${u.id}')">
+        <button class="pw-btn" onclick="doLogin('${u.id}')">Inloggen</button>
+      </div>
+      <div class="pw-err" id="pw-err-${u.id}">Onjuist wachtwoord</div>
+    `;
+    el.appendChild(div);
+  });
+}
+function promptLogin(id){
+  document.querySelectorAll('.user-pw-row').forEach(r=>r.style.display='none');
+  document.querySelectorAll('.pw-err').forEach(e=>e.style.display='none');
+  const row=document.getElementById('pw-row-'+id);
+  if(row){row.style.display='flex';row.querySelector('input').focus();}
+}
+function doLogin(id){
+  const u=db.users.find(u=>u.id===id);if(!u)return;
+  const inp=document.getElementById('pw-input-'+id);
+  const errEl=document.getElementById('pw-err-'+id);
+  if(u.pwHash&&hashPw(inp.value)!==u.pwHash){
+    if(errEl)errEl.style.display='block';
+    inp.value='';inp.focus();return;
+  }
+  loginAs(id);
+}
+function createUser(){
+  const name=document.getElementById('newName').value.trim();
+  const syncCode=(document.getElementById('newSyncCode').value||'').trim().toLowerCase();
+  const pw=document.getElementById('newPw').value;
+  const errEl=document.getElementById('createError');
+  errEl.style.display='none';
+  function showErr(msg){errEl.textContent=msg;errEl.style.display='block';}
+  if(!name)return showErr('Vul een naam in.');
+  if(!syncCode)return showErr('Kies een persoonlijke code, bijv. "tennis123".');
+  if(!/^[a-z0-9]+$/.test(syncCode))return showErr('De code mag alleen letters en cijfers bevatten.');
+  if(syncCode.length<3)return showErr('De code moet minimaal 3 tekens zijn.');
+  if(!pw)return showErr('Kies een wachtwoord.');
+  if(!isPwValid(pw))return showErr('Het wachtwoord voldoet niet aan de eisen.');
+  if(db.users.some(u=>u.syncCode===syncCode))return showErr('Deze code is al in gebruik. Kies een andere.');
+  const id='u'+Date.now();
+  const u={id,name,avatar:selectedAvatar,pwHash:hashPw(pw),syncCode};
+  if(newUserPhoto)u.photo=newUserPhoto;
+  db.users.push(u);saveDB(db);
+  saveUD(id,{stats:{cards:0,pron:0,trans:0,vocab:0,streak:0,lastDate:''},customCats:[],deletedBuiltin:{},catAdditions:{}});
+  document.getElementById('newName').value='';
+  document.getElementById('newPw').value='';
+  document.getElementById('newSyncCode').value='';
+  newUserPhoto=null;
+  loginAs(id);
+}
+function loginAs(id){
+  db.cur=id;curId=id;saveDB(db);ud=loadUD(id);
+  const u=db.users.find(u=>u.id===id);
+  document.getElementById('navAvatar').style.display='flex';
+  updateNavAvatar(u);
+  document.getElementById('tabBar').classList.add('on');
+  updateStats();
+  showScreen('screen-home','Frans Oefenen');
+  setActiveTab('home');
+}
+function updateStats(){
+  if(!ud)return;
+  const s=ud.stats,today=new Date().toDateString();
+  if(s.lastDate!==today){
+    s.streak=(s.lastDate===new Date(Date.now()-86400000).toDateString())?s.streak+1:1;
+    s.lastDate=today;saveUD(curId,ud);
+  }
+  const u=db.users.find(u=>u.id===curId);
+  // profile banner
+  const photoEl=document.getElementById('homeProfilePhoto');
+  if(photoEl){
+    if(u&&u.photo)photoEl.innerHTML=`<img src="${u.photo}">`;
+    else photoEl.textContent=u?(u.avatar||u.name[0]):'👤';
+  }
+  if(u)setEl('homeProfileName',u.name);
+  setEl('dashStreak',s.streak);
+  const total=s.cards+s.pron+s.trans+s.vocab;
+  setEl('homeTotal',total);
+  // practice cards
+  setEl('sCards',s.cards+' kaarten');
+  setEl('sPron',s.pron+' oefeningen');
+  setEl('sTrans',s.trans+' vertalingen');
+  setEl('sVocab',s.vocab+' woorden');
+  renderHomeGroups();
+}
+function setEl(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+function switchAccount(){
+  db.cur=null;curId=null;ud=null;saveDB(db);
+  const nav=document.getElementById('navAvatar');
+  nav.style.display='none';
+  document.getElementById('navAvatarInner').textContent='👤';
+  document.getElementById('tabBar').classList.remove('on');
+  showScreen('screen-login','Welkom');
+  document.getElementById('navBack').classList.remove('on');
+}
+function deleteAccount(){
+  if(!confirm('Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden.'))return;
+  localStorage.removeItem('fr_ud_'+curId);
+  db.users=db.users.filter(u=>u.id!==curId);
+  db.cur=null;saveDB(db);
+  curId=null;ud=null;
+  document.getElementById('navAvatar').style.display='none';
+  document.getElementById('tabBar').classList.remove('on');
+  showScreen('screen-login','Welkom');
+}
+
+// ══ NAVIGATION ═══════════════════════════════════════════════
+const screenHistory=[];
+const TAB_SCREENS={'home':'screen-home','conv-cats':'screen-conv-cats','pron-cats':'screen-pron-cats','trans-cats':'screen-trans-cats','vocab-cats':'screen-vocab-cats','profile':'screen-profile'};
+const TAB_IDS={'home':'tab-home','conv-cats':'tab-conv','pron-cats':'tab-pron','trans-cats':'tab-trans','vocab-cats':'tab-vocab','profile':null};
+
+function showTab(tab){
+  if(isRec)stopRec(false);
+  const screenId=TAB_SCREENS[tab];
+  if(!screenId)return;
+  screenHistory.length=0;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  screenHistory.push(screenId);
+  document.getElementById('navBack').classList.remove('on');
+  setActiveTab(tab);
+  if(tab==='home'){document.getElementById('navTitle').textContent='Frans Oefenen';updateStats();}
+  else if(tab==='conv-cats'){document.getElementById('navTitle').textContent='💬 Gespreksoefening';buildConvCats();}
+  else if(tab==='pron-cats'){document.getElementById('navTitle').textContent='🎤 Uitspraakoefening';buildPronCats();}
+  else if(tab==='trans-cats'){document.getElementById('navTitle').textContent='🔄 Vertaaloefening';buildTransCats();}
+  else if(tab==='vocab-cats'){document.getElementById('navTitle').textContent='📝 Woordenschat';buildVocabCats();}
+  else if(tab==='profile'){document.getElementById('navTitle').textContent='Profiel';renderProfile();}
+}
+function setActiveTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tabMap={'home':'tab-home','conv-cats':'tab-conv','pron-cats':'tab-pron','trans-cats':'tab-trans','vocab-cats':'tab-vocab'};
+  if(tabMap[tab])document.getElementById(tabMap[tab]).classList.add('active');
+}
+function showScreen(id,title){
+  if(isRec)stopRec(false);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  screenHistory.push(id);
+  document.getElementById('navTitle').textContent=title||'Frans Oefenen';
+  document.getElementById('navBack').classList.toggle('on',screenHistory.length>1);
+  if(id==='screen-login')renderLogin();
+  if(id==='screen-add-cat')initAddCat();
+  if(id==='screen-group-search'){document.getElementById('groupSearchQ').value='';renderGroupSearch();}
+  if(id==='screen-group-detail')renderGroupDetail();
+}
+function goBack(){
+  if(isRec)stopRec(false);
+  if(screenHistory.length>1){
+    screenHistory.pop();
+    const prev=screenHistory[screenHistory.length-1];
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(prev).classList.add('active');
+    document.getElementById('navBack').classList.toggle('on',screenHistory.length>1);
+    if(prev==='screen-conv-cats'){document.getElementById('navTitle').textContent='💬 Gespreksoefening';buildConvCats();}
+    if(prev==='screen-pron-cats'){document.getElementById('navTitle').textContent='🎤 Uitspraakoefening';buildPronCats();}
+    if(prev==='screen-trans-cats'){document.getElementById('navTitle').textContent='🔄 Vertaaloefening';buildTransCats();}
+    if(prev==='screen-vocab-cats'){document.getElementById('navTitle').textContent='📝 Woordenschat';buildVocabCats();}
+    if(prev==='screen-home'){document.getElementById('navTitle').textContent='Frans Oefenen';updateStats();}
+    if(prev==='screen-group-detail'){const g=loadGroups().find(g=>g.id===activeGroupId);document.getElementById('navTitle').textContent=g?g.name:'Groep';renderGroupDetail();}
+    if(prev==='screen-group-search'){document.getElementById('navTitle').textContent='🔍 Groep zoeken';renderGroupSearch();}
+    if(prev==='screen-group-create')document.getElementById('navTitle').textContent='Nieuwe groep';
+  }
+}
+function goHome(){
+  if(isRec)stopRec(false);
+  showTab('home');
+}
+
+// ══ SENTENCE MANAGEMENT ═══════════════════════════════════════
+let mgCatKey='',mgCatType=''; // type: 'conv'|'vocab'
+
+function openManage(catKey,catType,catLabel){
+  mgCatKey=catKey;mgCatType=catType;
+  document.getElementById('manageCatInfo').innerHTML='<strong>'+catLabel+'</strong> — Beheer zinnen in deze categorie. Verwijderde zinnen zijn alleen voor jou verborgen.';
+  renderManageList();
+  showScreen('screen-manage','✏️ '+catLabel);
+}
+
+function getBuiltinItems(catKey,catType){
+  if(catType==='conv')return (PHRASES[catKey]||{}).phrases||[];
+  if(catType==='vocab')return (VOCAB[catKey]||{}).words||[];
+  return [];
+}
+
+function getEffectiveItems(catKey,catType){
+  const deleted=ud.deletedBuiltin[catKey]||[];
+  const builtin=getBuiltinItems(catKey,catType).filter((_,i)=>!deleted.includes(i));
+  const additions=(ud.catAdditions[catKey]||[]).map(a=>({...a,_userAdded:true}));
+  const community=loadCommunity().filter(c=>c.catKey===catKey).map(c=>({fr:c.fr,nl:c.nl,_community:true,_communityUser:c.userName}));
+  return [...builtin,...additions,...community];
+}
+
+function renderManageList(){
+  const el=document.getElementById('manageList');el.innerHTML='';
+  const deleted=ud.deletedBuiltin[mgCatKey]||[];
+  const builtin=getBuiltinItems(mgCatKey,mgCatType);
+  const additions=ud.catAdditions[mgCatKey]||[];
+
+  // Verborgen teller
+  const hcEl=document.getElementById('hiddenCount');
+  if(hcEl){
+    const n=deleted.length;
+    hcEl.textContent=n>0?`${n} ingebouwde zin${n!==1?'nen':''} verborgen — tik ↩️ om te herstellen`:'';
+    hcEl.classList.toggle('on',n>0);
+  }
+
+  // Ingebouwde zinnen
+  if(builtin.length){
+    builtin.forEach((item,i)=>{
+      const isDel=deleted.includes(i);
+      const d=document.createElement('div');
+      d.className='item-row'+(isDel?' hidden-item':'');
+      d.innerHTML=`
+        <div class="item-row-text">
+          <div class="item-row-fr">${item.fr}</div>
+          ${item.nl?`<div class="item-row-nl">${item.nl}</div>`:''}
+          <span class="owner-badge other">ingebouwd</span>
+        </div>
+        <div class="item-actions">
+          ${isDel
+            ?`<button onclick="toggleBuiltinDel('${mgCatKey}',${i})" class="restore-btn">↩️ Herstel</button>`
+            :`<button onclick="toggleBuiltinDel('${mgCatKey}',${i})" class="del-btn" title="Verberg deze zin">🗑️</button>`}
+        </div>`;
+      el.appendChild(d);
+    });
+  }
+
+  // Eigen toevoegingen — alleen maker ziet de delete-knop (ud is altijd van curId)
+  if(additions.length){
+    additions.forEach((item,i)=>{
+      const d=document.createElement('div');d.className='item-row';
+      const isPub=!!item.isPublic;
+      d.innerHTML=`
+        <div class="item-row-text">
+          <div class="item-row-fr">${item.fr}</div>
+          ${item.nl?`<div class="item-row-nl">${item.nl}</div>`:''}
+          <span class="owner-badge mine">jouw toevoeging</span>
+          <span class="item-row-badge ${isPub?'badge-pub':'badge-priv'}">${isPub?'🌍 Openbaar':'🔒 Privé'}</span>
+        </div>
+        <div class="item-actions">
+          <button onclick="toggleShareItem('${mgCatKey}',${i})" class="share-btn ${isPub?'pub':''}">${isPub?'✅ Gedeeld':'Deel'}</button>
+          <button onclick="removeUserItem('${mgCatKey}',${i})" class="del-btn">🗑️</button>
+        </div>`;
+      el.appendChild(d);
+    });
+  }
+
+  if(!builtin.length&&!additions.length){
+    el.innerHTML='<div class="empty"><div class="ei">📝</div>Nog geen zinnen.</div>';
+  }
+
+  // Community zinnen — fix: naar cel, delete-knop alleen voor eigen toevoegingen
+  const comm=loadCommunity().filter(c=>c.catKey===mgCatKey);
+  const cel=document.getElementById('communityList');cel.innerHTML='';
+  if(!comm.length){
+    cel.innerHTML='<div class="empty" style="padding:10px 0"><div class="ei">👥</div>Nog geen gedeelde zinnen.</div>';
+    return;
+  }
+  comm.forEach(c=>{
+    const isMine=c.userId===curId;
+    const d=document.createElement('div');d.className='item-row';
+    d.innerHTML=`
+      <div class="item-row-text">
+        <div class="item-row-fr">${c.fr}</div>
+        ${c.nl?`<div class="item-row-nl">${c.nl}</div>`:''}
+        <span class="owner-badge ${isMine?'mine':'other'}">${isMine?'jouw toevoeging':'👤 '+c.userName}</span>
+      </div>
+      <div class="item-actions">
+        ${isMine?`<button onclick="removeCommunityItem('${c.id}')" class="del-btn" title="Verwijder gedeelde zin">🗑️</button>`:''}
+      </div>`;
+    cel.appendChild(d);
+  });
+}
+
+function removeCommunityItem(id){
+  if(!confirm('Gedeelde zin verwijderen?'))return;
+  saveCommunity(loadCommunity().filter(c=>c.id!==id));
+  // Ook uit eigen catAdditions de isPublic vlag weghalen
+  Object.keys(ud.catAdditions).forEach(k=>{
+    (ud.catAdditions[k]||[]).forEach(item=>{
+      const comm=loadCommunity();
+      if(item.isPublic&&!comm.find(c=>c.userId===curId&&c.fr===item.fr&&c.catKey===k)){
+        item.isPublic=false;
+      }
+    });
+  });
+  saveUD(curId,ud);
+  renderManageList();
+}
+
+function toggleBuiltinDel(catKey,idx){
+  if(!ud.deletedBuiltin[catKey])ud.deletedBuiltin[catKey]=[];
+  const arr=ud.deletedBuiltin[catKey];
+  const pos=arr.indexOf(idx);
+  if(pos>=0)arr.splice(pos,1);else arr.push(idx);
+  saveUD(curId,ud);renderManageList();
+}
+
+function toggleShareItem(catKey,idx){
+  const item=ud.catAdditions[catKey][idx];
+  if(!item)return;
+  item.isPublic=!item.isPublic;
+  const comm=loadCommunity();
+  const u=db.users.find(u=>u.id===curId);
+  if(item.isPublic){
+    comm.push({id:'ci'+Date.now(),userId:curId,userName:u?.name||'Gebruiker',catKey,fr:item.fr,nl:item.nl||null,addedAt:Date.now()});
+    saveCommunity(comm);
+  } else {
+    saveCommunity(comm.filter(c=>!(c.userId===curId&&c.fr===item.fr&&c.catKey===catKey)));
+  }
+  saveUD(curId,ud);renderManageList();
+}
+
+function removeUserItem(catKey,idx){
+  if(!confirm('Zin verwijderen?'))return;
+  const item=ud.catAdditions[catKey][idx];
+  if(item&&item.isPublic){
+    saveCommunity(loadCommunity().filter(c=>!(c.userId===curId&&c.fr===item.fr&&c.catKey===catKey)));
+  }
+  ud.catAdditions[catKey].splice(idx,1);
+  saveUD(curId,ud);renderManageList();
+}
+
+function addMgItem(){
+  const fr=document.getElementById('mgFr').value.trim(),nl=document.getElementById('mgNl').value.trim();
+  if(!fr)return alert('Vul een Franse zin in.');
+  if(!ud.catAdditions[mgCatKey])ud.catAdditions[mgCatKey]=[];
+  ud.catAdditions[mgCatKey].push({fr,nl:nl||null,isPublic:false,id:'ui'+Date.now()});
+  saveUD(curId,ud);
+  document.getElementById('mgFr').value='';document.getElementById('mgNl').value='';
+  renderManageList();
+}
+
+// ══ CATEGORY GRIDS ════════════════════════════════════════════
+function builtinCard(icon,label,desc,count,onPractice,onQuiz,onManage){
+  const deleted=(ud?.deletedBuiltin||{})[Object.keys(PHRASES).find(k=>PHRASES[k].label===label)||Object.keys(VOCAB).find(k=>VOCAB[k].label===label)]?.length||0;
+  const d=document.createElement('div');d.className='cat-card';
+  d.innerHTML=`<div class="cat-icon">${icon}</div><div class="cat-info"><h4>${label}</h4><p>${desc}${deleted?` · <span style="color:var(--gray)">${deleted} verborgen</span>`:''}</p></div><div class="cat-right">${onQuiz?'<button class="quiz-btn">📝 Toets</button>':''}<div class="cat-badge">${count}</div>${onManage?'<button class="manage-btn" title="Zinnen beheren">✏️</button>':''}</div>`;
+  d.onclick=onPractice;
+  if(onQuiz)d.querySelector('.quiz-btn').onclick=e=>{e.stopPropagation();onQuiz();};
+  if(onManage)d.querySelector('.manage-btn').onclick=e=>{e.stopPropagation();onManage();};
+  return d;
+}
+function customCard(cat,onPractice,onQuiz){
+  const n=cat.items.length;
+  const d=document.createElement('div');d.className='cat-card';
+  d.innerHTML=`<div class="cat-icon">${cat.icon||'✏️'}</div><div class="cat-info"><h4>${cat.name}</h4><p>${n} item(s)</p></div><div class="cat-right">${onQuiz?'<button class="quiz-btn">📝 Toets</button>':''}<div class="cat-badge">${n}</div><button class="del-btn" title="Verwijder">🗑️</button></div>`;
+  d.onclick=onPractice;
+  d.querySelector('.del-btn').onclick=e=>{e.stopPropagation();deleteCat(cat.id);};
+  if(onQuiz)d.querySelector('.quiz-btn').onclick=e=>{e.stopPropagation();onQuiz();};
+  return d;
+}
+function addNewCard(){
+  const d=document.createElement('div');d.className='cat-card dashed';
+  d.innerHTML=`<div class="cat-icon">➕</div><div class="cat-info"><h4>Nieuw onderwerp toevoegen</h4><p>Maak een eigen categorie</p></div>`;
+  d.onclick=()=>showScreen('screen-add-cat','➕ Nieuw onderwerp');
+  return d;
+}
+function deleteCat(id){
+  if(!confirm('Onderwerp verwijderen?'))return;
+  ud.customCats=ud.customCats.filter(c=>c.id!==id);saveUD(curId,ud);
+  const a=document.querySelector('.screen.active');
+  if(a){const i=a.id;
+    if(i==='screen-conv-cats')buildConvCats();
+    if(i==='screen-pron-cats')buildPronCats();
+    if(i==='screen-trans-cats')buildTransCats();
+    if(i==='screen-vocab-cats')buildVocabCats();
+  }
+}
+
+function buildConvCats(){
+  const g=document.getElementById('convCatGrid');g.innerHTML='';
+  Object.entries(PHRASES).forEach(([k,c])=>{
+    const eff=getEffectiveItems(k,'conv');
+    g.appendChild(builtinCard(c.icon,c.label,eff.length+' zinnen',eff.length,()=>startConv(eff,c.label),eff.length>=2?()=>startQuiz('conv',eff,c.label):null,()=>openManage(k,'conv',c.label)));
+  });
+  (ud?.customCats||[]).filter(c=>c.items.length).forEach(c=>g.appendChild(customCard(c,()=>startConv(c.items,c.name),c.items.length>=2?()=>startQuiz('conv',c.items,c.name):null)));
+  g.appendChild(addNewCard());
+}
+function buildPronCats(){
+  const g=document.getElementById('pronCatGrid');g.innerHTML='';
+  Object.entries(PHRASES).forEach(([k,c])=>{
+    const eff=getEffectiveItems(k,'conv');
+    g.appendChild(builtinCard(c.icon,c.label,eff.length+' zinnen',eff.length,()=>startPron(eff,c.label),null,()=>openManage(k,'conv',c.label)));
+  });
+  (ud?.customCats||[]).filter(c=>c.items.length).forEach(c=>g.appendChild(customCard(c,()=>startPron(c.items,c.name),null)));
+  g.appendChild(addNewCard());
+}
+function buildTransCats(){
+  const g=document.getElementById('transCatGrid');g.innerHTML='';
+  Object.entries(PHRASES).forEach(([k,c])=>{
+    const eff=getEffectiveItems(k,'conv').filter(i=>i.nl);
+    g.appendChild(builtinCard(c.icon,c.label,eff.length+' zinnen',eff.length,()=>startTrans(eff,c.label),eff.length>=2?()=>startQuiz('trans',eff,c.label):null,()=>openManage(k,'conv',c.label)));
+  });
+  (ud?.customCats||[]).filter(c=>c.items.some(i=>i.nl)).forEach(c=>g.appendChild(customCard(c,()=>startTrans(c.items,c.name),c.items.length>=2?()=>startQuiz('trans',c.items,c.name):null)));
+  g.appendChild(addNewCard());
+}
+function buildVocabCats(){
+  const g=document.getElementById('vocabCatGrid');g.innerHTML='';
+  Object.entries(VOCAB).forEach(([k,c])=>{
+    const eff=getEffectiveItems(k,'vocab');
+    g.appendChild(builtinCard(c.icon,c.label,eff.length+' woorden',eff.length,()=>startVocab(eff,c.label),eff.length>=2?()=>startQuiz('vocab',eff,c.label):null,()=>openManage(k,'vocab',c.label)));
+  });
+  (ud?.customCats||[]).filter(c=>c.items.length).forEach(c=>g.appendChild(customCard(c,()=>startVocab(c.items,c.name),c.items.length>=2?()=>startQuiz('vocab',c.items,c.name):null)));
+  g.appendChild(addNewCard());
+}
+
+// ══ PROFILE ═══════════════════════════════════════════════════
+function renderProfile(){
+  if(!curId)return;
+  const u=db.users.find(u=>u.id===curId);
+  const s=ud.stats;
+  const avEl=document.getElementById('profileAv');
+  const wrap=document.getElementById('profilePhotoWrap');
+  if(u.photo){
+    if(wrap){
+      wrap.innerHTML=`<img src="${u.photo}" class="profile-av-large" style="border-radius:50%"><div class="profile-photo-edit">✏️<input type="file" accept="image/*" onchange="changeProfilePhoto(this)"></div>`;
+    }
+  }else{
+    if(wrap){
+      wrap.innerHTML=`<div class="profile-av-large" id="profileAv">${u.avatar||u.name[0]}</div><div class="profile-photo-edit">✏️<input type="file" accept="image/*" onchange="changeProfilePhoto(this)"></div>`;
+    }
+  }
+  document.getElementById('profileName').textContent=u.name;
+  document.getElementById('profileSub').textContent='Aan het Frans leren 🇫🇷';
+  document.getElementById('psSCards').textContent=s.cards;
+  document.getElementById('psPron').textContent=s.pron;
+  document.getElementById('psTrans').textContent=s.trans;
+  document.getElementById('psVocab').textContent=s.vocab;
+  document.getElementById('psStreak').textContent=s.streak;
+  document.getElementById('psCats').textContent=(ud.customCats||[]).length;
+  // Sync code weergave
+  const scEl=document.getElementById('profileSyncCode');
+  if(scEl){
+    if(u.syncCode){
+      scEl.innerHTML=`<div class="sync-code-pill">🔑 ${u.syncCode}</div><div style="font-size:11px;color:var(--gray);margin-top:2px">Dit is jouw persoonlijke code. Gebruik het samen met je wachtwoord op een ander apparaat.</div>`;
+    }else{
+      scEl.innerHTML=`<div style="font-size:12px;color:var(--gray)">Dit account heeft nog geen persoonlijke code. Maak een nieuw account aan om cross-device te gebruiken.</div>`;
+    }
+  }
+}
+
+// ══ CONVERSATION ══════════════════════════════════════════════
+let convPhrases=[],convIdx=0,convTrV=false;
+function startConv(phrases,label){convPhrases=phrases;convIdx=0;convTrV=false;showScreen('screen-conv','💬 '+label);renderConvCard();}
+function renderConvCard(){
+  const p=convPhrases[convIdx];convTrV=false;
+  document.getElementById('convFr').textContent=p.fr;
+  document.getElementById('convCtx').textContent=p.ctx||'';
+  document.getElementById('convTr').textContent=p.nl||'';
+  document.getElementById('convTr').classList.remove('on');
+  document.getElementById('convShowTr').textContent='👁 Toon vertaling';
+  const t=convPhrases.length;
+  document.getElementById('convCtr').textContent='Kaart '+(convIdx+1)+' / '+t;
+  document.getElementById('convProg').style.width=(((convIdx+1)/t)*100)+'%';
+}
+function toggleTr(){convTrV=!convTrV;document.getElementById('convTr').classList.toggle('on',convTrV);document.getElementById('convShowTr').textContent=convTrV?'🙈 Verberg':'👁 Toon vertaling';}
+function convNext(){if(convIdx<convPhrases.length-1){convIdx++;renderConvCard();ud.stats.cards++;saveUD(curId,ud);}else showScore('💬 Gesprek voltooid!','Alle '+convPhrases.length+' zinnen geoefend.',convPhrases.length,convPhrases.length);}
+function convPrev(){if(convIdx>0){convIdx--;renderConvCard();}}
+function speakConv(){speak(convPhrases[convIdx].fr,'fr-FR');}
+
+// ══ PRONUNCIATION ═════════════════════════════════════════════
+let pronPhrases=[],pronIdx=0,pronScores=[],pronPassed=[],pronAttempts=[];
+let recog=null,isRec=false,recTarget=null,recCallback=null;
+
+function startPron(phrases,label){
+  pronPhrases=phrases;pronIdx=0;pronScores=[];pronPassed=[];pronAttempts=[];
+  showScreen('screen-pron','🎤 '+label);renderPronCard();
+}
+function renderPronCard(){
+  const p=pronPhrases[pronIdx];
+  document.getElementById('pronFr').textContent=p.fr;
+  document.getElementById('pronNl').textContent=p.nl?'🇳🇱 '+p.nl:'';
+  clearFb('pronFb');
+  document.getElementById('pronMic').classList.remove('rec');
+  document.getElementById('pronLbl').textContent='Tik op de microfoon en spreek';
+  document.getElementById('pronPassBanner').classList.remove('on');
+  document.getElementById('pronAttNote').classList.remove('on');
+  document.getElementById('pronNextBtn').style.display='none';
+  document.getElementById('pronSkipBtn').style.display='none';
+  const t=pronPhrases.length;
+  document.getElementById('pronCtr').textContent='Oefening '+(pronIdx+1)+' / '+t;
+  document.getElementById('pronProg').style.width=(((pronIdx+1)/t)*100)+'%';
+  checkSpeech('pronWarn','pronMicWrap');
+}
+function speakPron(){speak(pronPhrases[pronIdx].fr,'fr-FR');}
+function pronNext(){
+  if(isRec)stopRec(false);
+  pronScores[pronIdx]=pronScores[pronIdx]||0;
+  if(pronIdx<pronPhrases.length-1){pronIdx++;renderPronCard();}
+  else{const g=pronPassed.filter(Boolean).length;showScore('🎤 Uitspraakresultaat',g+' van de '+pronPhrases.length+' zinnen correct uitgesproken.',g,pronPhrases.length);}
+}
+function pronSkip(){pronPassed[pronIdx]=false;pronNext();}
+function pronPrev(){if(isRec)stopRec(false);if(pronIdx>0){pronIdx--;renderPronCard();}}
+function togglePronRec(){
+  if(isRec){stopRec(false);return;}
+  recTarget=pronPhrases[pronIdx].fr;
+  recCallback=(heardList)=>{
+    const res=evalPron(heardList,recTarget);
+    pronScores[pronIdx]=res.score;
+    if(!pronAttempts[pronIdx])pronAttempts[pronIdx]=0;
+    pronAttempts[pronIdx]++;
+    ud.stats.pron++;saveUD(curId,ud);
+    renderFb('pronFb','pronVerdict','pronScore','pronBar','pronHeard','pronChips','pronMissed','pronTip','pronTipText',res,recTarget);
+    if(res.score>=PASS_THRESHOLD){
+      pronPassed[pronIdx]=true;
+      document.getElementById('pronPassBanner').classList.add('on');
+      document.getElementById('pronLbl').textContent='🎉 Parfait!';
+      document.getElementById('pronNextBtn').style.display='flex';
+      document.getElementById('pronSkipBtn').style.display='none';
+    } else {
+      pronPassed[pronIdx]=false;
+      const att=pronAttempts[pronIdx],note=document.getElementById('pronAttNote');
+      if(att>=MAX_ATTEMPTS){note.textContent='Na '+att+' pogingen kun je ook overslaan.';note.classList.add('on');document.getElementById('pronSkipBtn').style.display='flex';}
+      else{note.textContent='Poging '+att+'/'+MAX_ATTEMPTS+' — probeer opnieuw.';note.classList.add('on');}
+    }
+  };
+  startRec('fr-FR');
+}
+
+// ══ TRANSLATION ═══════════════════════════════════════════════
+let transPhrases=[],transIdx=0,transScores=[],transRevOn=false;
+function startTrans(phrases,label){transPhrases=phrases;transIdx=0;transScores=[];showScreen('screen-trans','🔄 '+label);renderTransCard();}
+function renderTransCard(){
+  const p=transPhrases[transIdx];transRevOn=false;
+  document.getElementById('transNl').textContent=p.nl||p.fr;
+  document.getElementById('transRevTxt').textContent=p.fr;
+  document.getElementById('transRev').classList.remove('on');
+  document.getElementById('transRevBtn').textContent='💡 Toon Frans antwoord';
+  clearFb('transFb');
+  document.getElementById('transMic').classList.remove('rec');
+  document.getElementById('transLbl').textContent='Tik op de microfoon en spreek Frans';
+  const t=transPhrases.length;
+  document.getElementById('transCtr').textContent='Oefening '+(transIdx+1)+' / '+t;
+  document.getElementById('transProg').style.width=(((transIdx+1)/t)*100)+'%';
+  checkSpeech('transWarn','transMicWrap');
+}
+function toggleTransRev(){transRevOn=!transRevOn;document.getElementById('transRev').classList.toggle('on',transRevOn);document.getElementById('transRevBtn').textContent=transRevOn?'🙈 Verberg':'💡 Toon antwoord';}
+function speakTrans(){speak(transPhrases[transIdx].fr,'fr-FR');}
+function transNext(){if(isRec)stopRec(false);if(transIdx<transPhrases.length-1){transIdx++;renderTransCard();}else{const g=transScores.filter(s=>s>=80).length;showScore('🔄 Vertaalresultaat',g+' van de '+transPhrases.length+' correct.',g,transPhrases.length);}}
+function transPrev(){if(isRec)stopRec(false);if(transIdx>0){transIdx--;renderTransCard();}}
+function toggleTransRec(){
+  if(isRec){stopRec(false);return;}
+  recTarget=transPhrases[transIdx].fr;
+  recCallback=(heardList)=>{
+    const res=evalPron(heardList,recTarget);
+    transScores[transIdx]=res.score;
+    renderFb('transFb','transVerdict','transScore','transBar','transHeard','transChips','transMissed','transTip','transTipText',res,recTarget);
+    document.getElementById('transLbl').textContent=res.score>=80?'🎉 Goed gedaan!':'Probeer opnieuw';
+    document.getElementById('transRev').classList.add('on');transRevOn=true;
+    document.getElementById('transRevBtn').textContent='🙈 Verberg antwoord';
+    ud.stats.trans++;saveUD(curId,ud);
+  };
+  startRec('fr-FR');
+}
+
+// ══ VOCABULARY ════════════════════════════════════════════════
+let vocabWords=[],vocabIdx=0,vocabLabel='',vocabScores=[],vocabCorrect=[],vocabVPassed=[],vocabVAttempts=[];
+function startVocab(words,label){vocabWords=words;vocabIdx=0;vocabLabel=label;vocabScores=[];vocabCorrect=[];vocabVPassed=[];vocabVAttempts=[];showScreen('screen-vocab','📝 '+label);renderVocabCard();}
+function renderVocabCard(){
+  const w=vocabWords[vocabIdx];
+  document.getElementById('vocabNl').textContent=w.nl||w.fr;
+  document.getElementById('vocabInput').value='';
+  document.getElementById('vocabAnswer').classList.remove('on');
+  document.getElementById('vocabAnswerTxt').textContent=w.fr;
+  document.getElementById('vocabWrong').classList.remove('on');
+  document.getElementById('vocabStep1').style.display='block';
+  document.getElementById('vocabStep2').style.display='none';
+  clearFb('vocabFb');
+  document.getElementById('vocabMic').classList.remove('rec');
+  document.getElementById('vocabLbl').textContent='Tik op de microfoon en spreek';
+  document.getElementById('vocabPassBanner').classList.remove('on');
+  document.getElementById('vocabAttNote').classList.remove('on');
+  document.getElementById('vocabNextBtn').style.display='none';
+  document.getElementById('vocabSkipBtn').style.display='none';
+  const t=vocabWords.length;
+  document.getElementById('vocabCtr').textContent='Woord '+(vocabIdx+1)+' / '+t;
+  document.getElementById('vocabProg').style.width=(((vocabIdx+1)/t)*100)+'%';
+  checkSpeech('vocabWarnSpeech','vocabMicWrap');
+  setTimeout(()=>document.getElementById('vocabInput').focus(),300);
+}
+function checkVocab(){
+  const w=vocabWords[vocabIdx],input=document.getElementById('vocabInput').value.trim();
+  if(!input)return;
+  const sc=similarity(normalize(input),normalize(stripArticle(w.fr)));
+  if(sc>=75){
+    vocabCorrect[vocabIdx]=true;
+    document.getElementById('vocabAnswer').classList.add('on');
+    document.getElementById('vocabWrong').classList.remove('on');
+    goToVocabPron();
+  } else {
+    vocabCorrect[vocabIdx]=false;
+    document.getElementById('vocabWrong').classList.add('on');
+    document.getElementById('vocabWrongTxt').textContent='❌ Niet correct (je gaf: "'+input+'"). Probeer opnieuw of sla over.';
+  }
+}
+function vocabSkip(){vocabCorrect[vocabIdx]=false;document.getElementById('vocabAnswer').classList.add('on');goToVocabPron();}
+function goToVocabPron(){
+  const w=vocabWords[vocabIdx];
+  document.getElementById('vocabStep1').style.display='none';
+  document.getElementById('vocabStep2').style.display='block';
+  document.getElementById('vocabPronFr').textContent=w.fr;
+  document.getElementById('vocabPronNl').textContent='🇳🇱 '+(w.nl||'');
+  vocabVAttempts[vocabIdx]=0;
+}
+function speakVocab(){speak(vocabWords[vocabIdx].fr,'fr-FR');}
+function vocabNext(){
+  if(isRec)stopRec(false);
+  vocabScores[vocabIdx]=vocabScores[vocabIdx]||0;
+  if(vocabIdx<vocabWords.length-1){vocabIdx++;renderVocabCard();}
+  else{
+    const correct=vocabCorrect.filter(Boolean).length,good=vocabVPassed.filter(Boolean).length;
+    ud.stats.vocab+=vocabWords.length;saveUD(curId,ud);
+    showScore('📝 Woordenschat klaar!',correct+'/'+vocabWords.length+' vertaald · '+good+'/'+vocabWords.length+' uitgesproken.',correct+good,vocabWords.length*2);
+  }
+}
+function toggleVocabRec(){
+  if(isRec){stopRec(false);return;}
+  recTarget=vocabWords[vocabIdx].fr;
+  recCallback=(heardList)=>{
+    const res=evalPron(heardList,recTarget);
+    vocabScores[vocabIdx]=res.score;
+    if(!vocabVAttempts[vocabIdx])vocabVAttempts[vocabIdx]=0;
+    vocabVAttempts[vocabIdx]++;
+    renderFb('vocabFb','vocabVerdict','vocabScore','vocabBar','vocabHeard',null,null,'vocabTip','vocabTipText',res,recTarget);
+    if(res.score>=PASS_THRESHOLD){
+      vocabVPassed[vocabIdx]=true;
+      document.getElementById('vocabPassBanner').classList.add('on');
+      document.getElementById('vocabLbl').textContent='🎉 Parfait!';
+      document.getElementById('vocabNextBtn').style.display='flex';
+      document.getElementById('vocabSkipBtn').style.display='none';
+    } else {
+      vocabVPassed[vocabIdx]=false;
+      const att=vocabVAttempts[vocabIdx],note=document.getElementById('vocabAttNote');
+      note.textContent='Poging '+att+'/'+MAX_ATTEMPTS+(att>=MAX_ATTEMPTS?' — je kunt ook overslaan.':' — probeer opnieuw.');
+      note.classList.add('on');
+      if(att>=MAX_ATTEMPTS)document.getElementById('vocabSkipBtn').style.display='flex';
+    }
+  };
+  startRec('fr-FR');
+}
+
+// ══ ADD CUSTOM CATEGORY ═══════════════════════════════════════
+let acItems=[];
+function initAddCat(){acItems=[];document.getElementById('acName').value='';document.getElementById('acIcon').value='';document.getElementById('acFr').value='';document.getElementById('acNl').value='';renderAcItems();}
+function addAcItem(){
+  const fr=document.getElementById('acFr').value.trim(),nl=document.getElementById('acNl').value.trim();
+  if(!fr)return alert('Vul een Franse zin of woord in.');
+  acItems.push({fr,nl:nl||null});
+  document.getElementById('acFr').value='';document.getElementById('acNl').value='';
+  renderAcItems();document.getElementById('acFr').focus();
+}
+function removeAcItem(i){acItems.splice(i,1);renderAcItems();}
+function renderAcItems(){
+  const el=document.getElementById('acItemsList');el.innerHTML='';
+  if(!acItems.length){el.innerHTML='<div class="empty" style="padding:12px 0"><div class="ei">📝</div>Nog geen items.</div>';return;}
+  acItems.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='item-row';
+    d.innerHTML=`<div class="item-row-text"><div class="item-row-fr">${item.fr}</div>${item.nl?'<div class="item-row-nl">'+item.nl+'</div>':''}</div><button onclick="removeAcItem(${i})" class="del-btn">🗑️</button>`;
+    el.appendChild(d);
+  });
+}
+function saveAc(){
+  const name=document.getElementById('acName').value.trim();
+  if(!name)return alert('Vul een naam in voor het onderwerp.');
+  if(!acItems.length)return alert('Voeg minimaal één zin of woord toe.');
+  const icon=document.getElementById('acIcon').value.trim()||'✏️';
+  ud.customCats.push({id:'cat'+Date.now(),name,icon,items:[...acItems]});
+  saveUD(curId,ud);alert('✅ Onderwerp "'+name+'" opgeslagen!');goBack();
+}
+
+// ══ QUIZ ══════════════════════════════════════════════════════
+let quizItems=[],quizIdx=0,quizCorrect=0,quizMode='';
+function startQuiz(mode,items,label){
+  quizMode=mode;quizItems=shuffle([...items]).slice(0,10);quizIdx=0;quizCorrect=0;
+  showScreen('screen-quiz','📝 Toets: '+label);renderQuizQ();
+}
+function renderQuizQ(){
+  if(quizIdx>=quizItems.length){showScore('📝 Toets klaar!',quizCorrect+' van de '+quizItems.length+' vragen correct.',quizCorrect,quizItems.length);return;}
+  const item=quizItems[quizIdx],t=quizItems.length;
+  document.getElementById('quizCtr').textContent='Vraag '+(quizIdx+1)+' / '+t;
+  document.getElementById('quizProg').style.width=(((quizIdx+1)/t)*100)+'%';
+  let qText,correct,qlabel;
+  if(quizMode==='vocab'){qText=item.nl||item.fr;correct=item.fr;qlabel='🇳🇱 Wat is de Franse vertaling?';}
+  else if(quizIdx%2===0){qText=item.fr;correct=item.nl||item.fr;qlabel='🇫🇷 Wat betekent dit in het Nederlands?';}
+  else{qText=item.nl||item.fr;correct=item.fr;qlabel='🇳🇱 Hoe zeg je dit in het Frans?';}
+  document.getElementById('quizLabel').textContent=qlabel;
+  document.getElementById('quizQ').textContent=qText;
+  const pool=[...Object.values(quizMode==='vocab'?VOCAB:PHRASES).flatMap(c=>c.words||c.phrases||[]),...(ud?.customCats||[]).flatMap(c=>c.items)].filter(x=>x!==item);
+  const distractors=shuffle(pool).slice(0,3).map(x=>quizMode==='vocab'?(quizIdx%2===0?x.fr:x.nl||x.fr):(quizIdx%2===0?x.nl||x.fr:x.fr)).filter(x=>x&&x!==correct);
+  while(distractors.length<3)distractors.push('...');
+  const opts=shuffle([correct,...distractors.slice(0,3)]);
+  const optsEl=document.getElementById('quizOpts');optsEl.innerHTML='';
+  opts.forEach(opt=>{
+    const b=document.createElement('button');b.className='quiz-opt';b.textContent=opt;
+    b.onclick=()=>{
+      if(b.classList.contains('disabled'))return;
+      const ok=opt===correct;if(ok)quizCorrect++;
+      b.classList.add(ok?'correct':'wrong');
+      optsEl.querySelectorAll('.quiz-opt').forEach(x=>{if(x.textContent===correct)x.classList.add('correct');x.classList.add('disabled');});
+      setTimeout(()=>{quizIdx++;renderQuizQ();},1300);
+    };
+    optsEl.appendChild(b);
+  });
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ══ SCORE ═════════════════════════════════════════════════════
+function showScore(title,sub,good,total){
+  const pct=total>0?Math.round((good/total)*100):100;
+  document.getElementById('scoreEmoji').textContent=pct>=85?'🎉':pct>=60?'👍':'💪';
+  document.getElementById('scoreTitle').textContent=title;
+  document.getElementById('scoreSub').textContent=sub;
+  document.getElementById('scoreNum').textContent=good+'/'+total;
+  showScreen('screen-score','Resultaat');
+}
+function repeatLast(){goBack();goBack();}
+
+// ══ SPEECH RECOGNITION ════════════════════════════════════════
+function checkSpeech(warnId,micId){
+  const has=('SpeechRecognition' in window)||('webkitSpeechRecognition' in window);
+  document.getElementById(warnId).style.display=has?'none':'block';
+  document.getElementById(micId).style.display=has?'block':'none';
+}
+function startRec(lang){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  recog=new SR();recog.lang=lang;recog.interimResults=false;recog.maxAlternatives=8;
+  isRec=true;
+  const mic=document.querySelector('.screen.active .mic-btn');
+  const lbl=document.querySelector('.screen.active .mic-lbl');
+  if(mic)mic.classList.add('rec');
+  if(lbl)lbl.textContent='Aan het luisteren… spreek nu!';
+  recog.onresult=e=>{const r=Array.from(e.results[0]).map(x=>x.transcript.toLowerCase().trim());if(recCallback)recCallback(r);};
+  recog.onerror=e=>{stopRec(false);const msgs={'not-allowed':'❌ Microfoon geweigerd.','no-speech':'🔇 Geen spraak — probeer opnieuw.'};if(lbl)lbl.textContent=msgs[e.error]||'⚠️ Fout: '+e.error;};
+  recog.onend=()=>{isRec=false;document.querySelectorAll('.mic-btn').forEach(b=>b.classList.remove('rec'));};
+  recog.start();
+}
+function stopRec(manual){
+  if(recog){try{recog.stop();}catch(e){}}
+  isRec=false;
+  document.querySelectorAll('.mic-btn').forEach(b=>b.classList.remove('rec'));
+  if(manual){const l=document.querySelector('.screen.active .mic-lbl');if(l)l.textContent='Tik op de microfoon en spreek';}
+}
+
+// ══ PRONUNCIATION EVALUATION (strict) ════════════════════════
+function evalPron(heardList,targetFr){
+  const t=normalize(targetFr);
+  const best=heardList.reduce((b,h)=>{const s=strictSim(normalize(h),t);return s>b.score?{text:h,score:s}:b;},{text:heardList[0]||'',score:0});
+  return best;
+}
+
+// ── Franse fonetische normalisatie ──
+// Verwerkt veelvoorkomende spraakherkenning-varianten van Frans
+function phonetizeFr(t){
+  return t
+    .replace(/\bj'ai\b/g,'jai').replace(/\bc'est\b/g,'say').replace(/\bqu'est-ce que\b/g,'keske')
+    .replace(/\bil y a\b/g,'ilya').replace(/\bje suis\b/g,'jsui').replace(/\bje m'appelle\b/g,'jemapel')
+    .replace(/\bmerci\b/g,'mersi').replace(/\bbonjour\b/g,'bonjur').replace(/\bcomment\b/g,'koman')
+    .replace(/\bvoudrais\b/g,'voudre').replace(/\bpeut-être\b/g,'peutet')
+    .replace(/\best-ce que\b/g,'eske').replace(/\bbeaucoup\b/g,'boku')
+    .replace(/\bparce que\b/g,'parsk').replace(/\bqu'il\b/g,'kil').replace(/\bqu'elle\b/g,'kel')
+    .replace(/[-'']/g,'').replace(/\s+/g,' ').trim();
+}
+
+// Strict similarity: strenge woordmatch — korte woorden moeten exact, lange bijna-exact
+function strictSim(heard,target){
+  if(!heard||!target)return 0;
+  const ph=phonetizeFr(heard),pt=phonetizeFr(target);
+  if(ph===pt)return 100;
+  const hw=ph.split(' ').filter(Boolean);
+  const tw=pt.split(' ').filter(Boolean);
+  if(!hw.length||!tw.length)return 0;
+
+  // Woordmatch: elk doelwoord moet nauwkeurig herkend worden
+  let matched=0;
+  const usedH=new Set();
+  tw.forEach(tv=>{
+    let bestScore=0,bestIdx=-1;
+    hw.forEach((hv,i)=>{
+      if(!usedH.has(i)){const s=strictWordSim(hv,tv);if(s>bestScore){bestScore=s;bestIdx=i;}}
+    });
+    if(bestScore>=WORD_MATCH_THRESHOLD){matched+=bestScore;if(bestIdx>=0)usedH.add(bestIdx);}
+    // Ontbrekend woord: geen punten
+  });
+
+  const wordScore=(matched/tw.length)*100;
+  const charScore=charSim(ph.replace(/\s/g,''),pt.replace(/\s/g,''));
+
+  // 90% woordmatch, 10% tekenmatch — strenger dan voorheen (was 70/30)
+  return Math.round(Math.min(100,wordScore*0.9+charScore*0.1));
+}
+
+function strictWordSim(a,b){
+  if(a===b)return 1;
+  const d=editDist(a,b),ml=Math.max(a.length,b.length);
+  if(!ml)return 1;
+  // Korte woorden (≤4 tekens): exact vereist — "le","la","un","est","je" etc.
+  if(ml<=4)return 0;
+  // Middellange woorden (5-6): maximaal 1 edit, hoge drempel
+  if(ml<=6&&d===1)return 0.87;
+  // Langere woorden (7+): 1 edit toegestaan
+  if(ml>=7&&d===1)return 0.90;
+  // 2 edits alleen bij zeer lange woorden (9+)
+  if(ml>=9&&d===2)return 0.82;
+  // Alles anders: niet goed genoeg
+  return 0;
+}
+
+function renderFb(fbId,verdictId,scoreId,barId,heardId,chipsId,missedId,tipId,tipTextId,result,targetFr){
+  const {score,text}=result;
+  const box=document.getElementById(fbId);
+  box.classList.remove('good','ok','bad');
+  let cls,verdict;
+  if(score>=PASS_THRESHOLD){cls='good';verdict='✅ Parfait! Uitspraak correct!';}
+  else if(score>=85){cls='ok';verdict='🟡 Bijna — één of twee woorden kloppen niet precies.';}
+  else if(score>=65){cls='bad';verdict='❌ Meerdere woorden verkeerd — let op elke klank.';}
+  else if(score>0){cls='bad';verdict='❌ Niet herkend — spreek langzamer, woord voor woord.';}
+  else{cls='bad';verdict='❌ Niets verstaan — probeer opnieuw, dichter bij de microfoon.';}
+  box.classList.add(cls,'on');
+  document.getElementById(verdictId).textContent=verdict;
+  document.getElementById(scoreId).textContent=score+'%';
+  document.getElementById(barId).style.width=score+'%';
+  document.getElementById(heardId).innerHTML='Je zei: <em>'+(text||'(niets herkend)')+'</em>';
+  if(chipsId){
+    const tw=normalize(targetFr).split(' ').filter(Boolean);
+    const hw=normalize(text||'').split(' ');
+    const el=document.getElementById(chipsId);el.innerHTML='';
+    const missed=[];
+    tw.forEach(w=>{
+      const ok=hw.some(h=>strictWordSim(h,w)>=WORD_MATCH_THRESHOLD);
+      const c=document.createElement('span');c.className='chip '+(ok?'c':'m');c.textContent=w;
+      el.appendChild(c);if(!ok)missed.push(w);
+    });
+    if(missedId){const m=document.getElementById(missedId);m.textContent=missed.length&&score<PASS_THRESHOLD?'Gemist: '+missed.join(', '):'';m.style.display=missed.length&&score<PASS_THRESHOLD?'block':'none';}
+  }
+  if(tipId&&score<PASS_THRESHOLD){
+    const tip=getSoundTip(targetFr);
+    const el=document.getElementById(tipId);el.style.display=tip?'block':'none';
+    if(tip)document.getElementById(tipTextId).textContent=tip;
+  } else if(tipId){document.getElementById(tipId).style.display='none';}
+}
+function clearFb(id){const el=document.getElementById(id);el.classList.remove('on','good','ok','bad');}
+
+// ══ SIMILARITY HELPERS ════════════════════════════════════════
+function normalize(t){return(t||'').toLowerCase().replace(/[''"""«».,!?;:]/g,'').replace(/\s+/g,' ').trim();}
+function stripArticle(t){return t.replace(/^(le |la |les |l'|un |une |des )/i,'').trim();}
+function similarity(a,b){
+  if(!a||!b)return 0;if(a===b)return 100;
+  const aw=a.split(' ').filter(Boolean),bw=b.split(' ').filter(Boolean);
+  if(!aw.length||!bw.length)return 0;
+  let m=0;bw.forEach(bv=>{const best=aw.reduce((x,av)=>{const s=strictWordSim(av,bv);return s>x?s:x;},0);m+=best;});
+  return Math.round(Math.min(100,(m/bw.length)*100*0.65+charSim(a.replace(/\s/g,''),b.replace(/\s/g,''))*0.35));
+}
+function charSim(a,b){if(!a||!b)return 0;if(a===b)return 100;const d=editDist(a,b);return Math.max(0,Math.round((1-d/Math.max(a.length,b.length))*100));}
+function editDist(a,b){
+  const m=a.length,n=b.length;if(!m)return n;if(!n)return m;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>j===0?i:i===0?j:0));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+// ══ TTS ═══════════════════════════════════════════════════════
+function speak(text,lang){
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=0.80;
+  const v=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('fr'));
+  if(v)u.voice=v;window.speechSynthesis.speak(u);
+}
+if('speechSynthesis' in window)window.speechSynthesis.onvoiceschanged=()=>{};
+
+// ══ INIT ══════════════════════════════════════════════════════
+db=loadDB();
+if(db.cur&&db.users.find(u=>u.id===db.cur)){loginAs(db.cur);}
+else{showScreen('screen-login','Welkom');}
+</script>
+
+<!-- QR SYNC MODAL -->
+<div class="qr-modal" id="qrModal" onclick="if(event.target===this)hideQrModal()">
+  <div class="qr-sheet">
+    <div class="qr-sheet-title">Sync naar ander apparaat</div>
+    <div class="qr-sheet-sub">Scan de QR-code met je andere apparaat, of kopieer de tekst-code.</div>
+    <div class="qr-wrap"><div id="qrCanvas"></div></div>
+    <div class="sync-text-row">
+      <span class="sync-text-val" id="qrTextVal"></span>
+      <button class="sync-copy-btn" onclick="copyQrCode()">Kopiëren</button>
+    </div>
+    <p style="font-size:11px;color:var(--gray);text-align:center;margin-bottom:16px">Op het andere apparaat: open de app → "Importeer account" → plak de code → vul je wachtwoord in.</p>
+    <button class="btn btn-gray" onclick="hideQrModal()" style="margin-bottom:0">Sluiten</button>
+  </div>
+</div>
+
+</body>
+</html>
